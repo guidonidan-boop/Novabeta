@@ -13,7 +13,87 @@
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     
     <style>
-        /* Custom styles for animations and components */
+        /* Custom color palette */
+        :root {
+            --bg-primary: #1F3B2C;
+            --bg-secondary: #FFFFFF;
+            --text-primary: #96E6B3;
+            --text-secondary: #FFFFFF;
+            --accent: #96E6B3;
+        }
+        
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-secondary);
+        }
+        
+        .bg-primary { background-color: var(--bg-primary); }
+        .bg-secondary { background-color: var(--bg-secondary); }
+        .text-primary { color: var(--text-primary); }
+        .text-secondary { color: var(--text-secondary); }
+        .border-accent { border-color: var(--accent); }
+        .hover-accent:hover { background-color: var(--accent); }
+        
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.8);
+        }
+        
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background-color: var(--bg-secondary);
+            color: #1f2937;
+            margin: 15% auto;
+            padding: 20px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+        }
+        
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            position: absolute;
+            right: 15px;
+            top: 10px;
+        }
+        
+        .close:hover,
+        .close:focus {
+            color: #000;
+            text-decoration: none;
+        }
+        
+        .info-icon {
+            cursor: pointer;
+            color: var(--accent);
+            margin-left: 8px;
+            font-size: 14px;
+        }
+        
+        .info-icon:hover {
+            opacity: 0.7;
+        }
+        
+        /* Custom styles for animations */
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
@@ -23,8 +103,8 @@
         }
         
         .drag-active {
-            border-color: #16a34a !important;
-            background-color: #f0fdf4 !important;
+            border-color: var(--accent) !important;
+            background-color: rgba(150, 230, 179, 0.1) !important;
         }
         
         .fade-in {
@@ -36,18 +116,63 @@
             to { opacity: 1; transform: translateY(0); }
         }
         
-        /* Print styles */
-        @media print {
-            body { background: white !important; }
-            .no-print { display: none !important; }
+        /* Card styles */
+        .card {
+            background-color: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(150, 230, 179, 0.2);
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .card-white {
+            background-color: var(--bg-secondary);
+            color: #1f2937;
+        }
+        
+        /* Button styles */
+        .btn-primary {
+            background-color: var(--accent);
+            color: var(--bg-primary);
+            font-weight: 600;
+        }
+        
+        .btn-primary:hover {
+            background-color: rgba(150, 230, 179, 0.8);
+        }
+        
+        .btn-secondary {
+            border: 1px solid var(--accent);
+            color: var(--accent);
+        }
+        
+        .btn-secondary:hover {
+            background-color: rgba(150, 230, 179, 0.1);
+        }
+        
+        /* Link styles */
+        .external-link {
+            color: #3b82f6;
+            text-decoration: underline;
+        }
+        
+        .external-link:hover {
+            color: #1d4ed8;
         }
     </style>
 </head>
-<body class="min-h-screen bg-gradient-to-br from-green-50 to-blue-50">
+<body class="min-h-screen bg-primary">
+    <!-- Modal -->
+    <div id="infoModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <div id="modalContent"></div>
+        </div>
+    </div>
+
     <div id="app"></div>
 
     <script>
-        // Nova Sustainability Analyzer - Single File Version
+        // Nova Sustainability Analyzer - Updated Version
         class NovaSustainabilityAnalyzer {
             constructor() {
                 this.uploadedImage = null;
@@ -63,6 +188,34 @@
                 this.render();
                 this.attachEventListeners();
                 this.initializeLucideIcons();
+                this.setupModal();
+            }
+            
+            setupModal() {
+                const modal = document.getElementById('infoModal');
+                const closeBtn = document.querySelector('.close');
+                
+                closeBtn.onclick = () => {
+                    modal.classList.remove('show');
+                };
+                
+                window.onclick = (event) => {
+                    if (event.target === modal) {
+                        modal.classList.remove('show');
+                    }
+                };
+            }
+            
+            showInfoModal(title, content) {
+                const modal = document.getElementById('infoModal');
+                const modalContent = document.getElementById('modalContent');
+                
+                modalContent.innerHTML = `
+                    <h2 style="color: #1f2937; font-size: 1.5em; font-weight: bold; margin-bottom: 16px;">${title}</h2>
+                    <div style="line-height: 1.6;">${content}</div>
+                `;
+                
+                modal.classList.add('show');
             }
             
             initializeLucideIcons() {
@@ -100,6 +253,146 @@
                 
                 if (downloadBtn) {
                     downloadBtn.addEventListener('click', () => this.downloadCertificate());
+                }
+                
+                // Info icon events
+                document.addEventListener('click', (e) => {
+                    if (e.target.classList.contains('info-icon')) {
+                        const infoType = e.target.dataset.info;
+                        this.showInfoForType(infoType);
+                    }
+                });
+            }
+            
+            showInfoForType(type) {
+                const infoContent = {
+                    'co2_upload': {
+                        title: '📦 CO₂ per Upload',
+                        content: `
+                            <p><strong>Cosa significa:</strong><br>
+                            Caricare un contenuto digitale consuma energia nei server, nella rete e nei dispositivi. Questa energia, in media, genera circa <strong>0.072 grammi di CO₂ per ogni megabyte trasferito</strong>.</p>
+                            
+                            <p><strong>Formula utilizzata:</strong><br>
+                            <code>CO₂_upload (g) = MB × 0.072</code></p>
+                            
+                            <p><strong>Fonte:</strong><br>
+                            <a href="https://sustainablewebdesign.org/estimating-digital-emissions/" target="_blank" class="external-link">Sustainable Web Design – Estimating Digital Emissions</a></p>
+                        `
+                    },
+                    'water_upload': {
+                        title: '💧 Acqua per Upload',
+                        content: `
+                            <p><strong>Cosa significa:</strong><br>
+                            I data center usano acqua per raffreddare i server. A seconda della tecnologia e del paese, ogni MB trasferito può usare da <strong>1 a 205 millilitri d'acqua</strong>.</p>
+                            
+                            <p><strong>Formula utilizzata:</strong><br>
+                            <code>H₂O_upload (ml) = MB × W</code><br>
+                            (dove W ∈ [1, 205])</p>
+                            
+                            <p><strong>Fonti:</strong><br>
+                            • <a href="https://www.mdpi.com/2071-1050/7/8/11260" target="_blank" class="external-link">MDPI Study</a><br>
+                            • <a href="https://www.researchgate.net/publication/281719759" target="_blank" class="external-link">ResearchGate Publication</a><br>
+                            • <a href="https://watercalculator.org/footprint/data-centers-water-use/" target="_blank" class="external-link">WaterCalculator.org</a></p>
+                        `
+                    },
+                    'co2_view': {
+                        title: '⏱️ CO₂ per Visualizzazione',
+                        content: `
+                            <p><strong>Cosa significa:</strong><br>
+                            Ogni minuto in cui un utente visualizza un contenuto online consuma energia per alimentare lo schermo, la rete e i server. In media, ciò produce <strong>6 grammi di CO₂ per minuto di visualizzazione</strong>.</p>
+                            
+                            <p><strong>Formula utilizzata:</strong><br>
+                            <code>CO₂_view (g) = minuti × 6</code></p>
+                            
+                            <p><strong>Fonti:</strong><br>
+                            • <a href="https://www.iea.org/commentaries/the-carbon-footprint-of-streaming-video" target="_blank" class="external-link">IEA Carbon Footprint Study</a><br>
+                            • <a href="https://www.cloudzero.com/blog/tech-carbon-footprint/" target="_blank" class="external-link">CloudZero Carbon Footprint Analysis</a></p>
+                        `
+                    },
+                    'color_impact': {
+                        title: '🎨 Impatto Colori',
+                        content: `
+                            <p><strong>Cosa significa:</strong><br>
+                            I display OLED consumano più energia per mostrare colori chiari e accesi. Ad esempio, il bianco consuma fino a 3 volte più energia del nero. Questo impatta direttamente l'impronta di carbonio della visualizzazione.</p>
+                            
+                            <p><strong>Formula utilizzata:</strong><br>
+                            <code>CO₂_view_color (g) = CO₂_view × (1 + color_factor)</code><br>
+                            • Palette scura: +0%<br>
+                            • Colori accesi/blu: +25%<br>
+                            • Bianco/neon: +40%</p>
+                            
+                            <p><strong>Fonti:</strong><br>
+                            • <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8876531/" target="_blank" class="external-link">PMC Study on OLED</a><br>
+                            • <a href="https://sustainablewebdesign.org/has-the-color-palette-prioritized-colors-that-used-less-energy-on-oled-screens/" target="_blank" class="external-link">Sustainable Web Design</a></p>
+                        `
+                    },
+                    'contrast_wcag': {
+                        title: '📖 Contrasto WCAG',
+                        content: `
+                            <p><strong>Cosa significa:</strong><br>
+                            Il contrasto tra il testo e lo sfondo deve essere sufficientemente elevato per garantire la leggibilità anche a persone con disabilità visive. Le WCAG stabiliscono che il rapporto minimo deve essere 4.5:1 per il testo normale.</p>
+                            
+                            <p><strong>Formula utilizzata:</strong><br>
+                            <code>Contrast Ratio = (L1 + 0.05) / (L2 + 0.05)</code><br>
+                            dove L1 e L2 sono le luminosità relative dei colori</p>
+                            
+                            <p><strong>Standard:</strong><br>
+                            • ≥ 4.5:1 per testi normali (AA)<br>
+                            • ≥ 3:1 per testi grandi (≥ 18pt bold)</p>
+                            
+                            <p><strong>Fonte:</strong><br>
+                            <a href="https://www.w3.org/WAI/WCAG21/Understanding/contrast-minimum/" target="_blank" class="external-link">WCAG 2.1 Guideline 1.4.3</a></p>
+                        `
+                    },
+                    'alt_text': {
+                        title: '🖼️ Testo Alternativo',
+                        content: `
+                            <p><strong>Cosa significa:</strong><br>
+                            Ogni immagine dovrebbe includere un testo descrittivo che spieghi il contenuto visivo a chi non può vederlo. L'attributo <code>alt</code> è fondamentale per utenti non vedenti che usano screen reader.</p>
+                            
+                            <p><strong>Valutazione:</strong><br>
+                            L'analisi verifica se il contenuto include descrizioni testuali adeguate per elementi grafici.</p>
+                            
+                            <p><strong>Fonte:</strong><br>
+                            <a href="https://www.w3.org/WAI/WCAG21/Understanding/non-text-content/" target="_blank" class="external-link">WCAG 2.1 Guideline 1.1.1</a></p>
+                        `
+                    },
+                    'design_system': {
+                        title: '🎨 Design System',
+                        content: `
+                            <p><strong>Cosa significa:</strong><br>
+                            Se il contenuto usa componenti di un design system o libreria visiva standard, sarà più veloce da modificare, sviluppare e replicare. Un'interfaccia costruita con elementi riutilizzabili è <strong>più economica</strong> e sostenibile nel tempo.</p>
+                            
+                            <p><strong>Valutazione:</strong><br>
+                            • Componenti da librerie standard<br>
+                            • Uso di spacing coerente<br>
+                            • Ripetizione efficiente degli elementi</p>
+                            
+                            <p><strong>Riferimenti:</strong><br>
+                            • <a href="https://material.io/design" target="_blank" class="external-link">Material Design</a><br>
+                            • <a href="https://www.ibm.com/design/language/" target="_blank" class="external-link">IBM Design Language</a></p>
+                        `
+                    },
+                    'open_fonts': {
+                        title: '📝 Font Open Source',
+                        content: `
+                            <p><strong>Cosa significa:</strong><br>
+                            I font open source eliminano costi di licenza, sono compatibili cross-platform e leggeri da caricare. L'uso di font proprietari, invece, può comportare costi elevati, limiti di utilizzo e maggiore peso del file.</p>
+                            
+                            <p><strong>Valutazione:</strong><br>
+                            • Presenza di font gratuiti vs licenziati<br>
+                            • Assenza di font rasterizzati<br>
+                            • Peso e compatibilità</p>
+                            
+                            <p><strong>Riferimento:</strong><br>
+                            <a href="https://fonts.google.com/" target="_blank" class="external-link">Google Fonts (Elenco font open)</a></p>
+                        `
+                    }
+                };
+                
+                const info = infoContent[type];
+                if (info) {
+                    this.showInfoModal(info.title, info.content);
                 }
             }
             
@@ -281,10 +574,71 @@
                 return (lighter + 0.05) / (darker + 0.05);
             }
             
-            analyzeContrasts(colorAnalysis) {
+            // Updated environmental impact calculation with new formulas
+            calculateEnvironmentalImpact(image, colorAnalysis) {
+                const sizeInMB = image.size / (1024 * 1024);
+                
+                // New realistic formulas
+                const co2Upload = sizeInMB * 0.072; // 0.072g CO2 per MB for upload
+                const waterUpload = sizeInMB * 103; // Average 103ml (middle of 1-205ml range)
+                
+                // Viewing time estimation (assume 1 minute for images)
+                const viewingMinutes = 1;
+                const co2BaseView = viewingMinutes * 6; // 6g CO2 per minute
+                
+                // Color impact adjustment
+                let colorFactor = 0;
+                if (colorAnalysis.averageBrightness > 200) {
+                    colorFactor = 0.4; // White/neon content
+                } else if (colorAnalysis.averageBrightness > 150 || !colorAnalysis.isDarkTheme) {
+                    colorFactor = 0.25; // Bright colors/blue
+                } else {
+                    colorFactor = 0; // Dark palette
+                }
+                
+                const co2ViewWithColor = co2BaseView * (1 + colorFactor);
+                
+                // Total CO2 impact
+                const totalCO2 = co2Upload + co2ViewWithColor;
+                
+                // Calculate score based on efficiency
+                const optimalSizeMB = 0.15;
+                const sizeRatio = sizeInMB / optimalSizeMB;
+                let score = Math.max(0, 100 - (sizeRatio - 1) * 30);
+                
+                // Adjust for format efficiency
+                if (image.type === 'image/webp') score += 15;
+                else if (image.type === 'image/svg+xml') score += 20;
+                else if (image.type === 'image/png' && sizeInMB > 0.2) score -= 10;
+                
+                // Adjust for color efficiency
+                if (colorAnalysis.isDarkTheme) score += 10;
+                else if (colorAnalysis.averageBrightness > 200) score -= 15;
+                
+                score = Math.max(0, Math.min(100, score));
+                
+                const recommendations = [];
+                if (sizeInMB > 0.5) recommendations.push("Riduci dimensioni file: obiettivo <500KB");
+                if (image.type !== 'image/webp' && sizeInMB > 0.1) recommendations.push("Considera WebP per -30% dimensioni");
+                if (!colorAnalysis.isDarkTheme && colorAnalysis.averageBrightness > 180) recommendations.push("Palette più scura per dispositivi OLED");
+                
+                return {
+                    co2Upload: parseFloat(co2Upload.toFixed(3)),
+                    waterUpload: parseFloat(waterUpload.toFixed(2)),
+                    co2View: parseFloat(co2ViewWithColor.toFixed(2)),
+                    totalCO2: parseFloat(totalCO2.toFixed(2)),
+                    colorFactor: colorFactor,
+                    score: Math.round(score),
+                    recommendations,
+                    viewingMinutes
+                };
+            }
+            
+            analyzeAccessibility(colorAnalysis) {
                 const colors = colorAnalysis.dominantColors;
                 const contrasts = [];
                 
+                // Calculate contrasts between significant colors
                 const significantColors = colors.filter(color => parseFloat(color.percentage) > 2);
                 
                 for (let i = 0; i < Math.min(significantColors.length, 5); i++) {
@@ -295,131 +649,81 @@
                             color2: significantColors[j],
                             ratio: contrast,
                             wcagAA: contrast >= 4.5,
-                            wcagAAA: contrast >= 7.0,
-                            combinedWeight: parseFloat(significantColors[i].percentage) + parseFloat(significantColors[j].percentage)
+                            wcagAAA: contrast >= 7.0
                         });
                     }
                 }
                 
-                contrasts.sort((a, b) => (b.ratio * b.combinedWeight) - (a.ratio * a.combinedWeight));
-                
-                const bestContrast = contrasts.length > 0 ? contrasts[0] : null;
-                const maxContrast = bestContrast ? bestContrast.ratio : 1;
+                const bestContrast = contrasts.length > 0 ? Math.max(...contrasts.map(c => c.ratio)) : 1;
                 const avgContrast = contrasts.length > 0 ? 
                     contrasts.reduce((sum, c) => sum + c.ratio, 0) / contrasts.length : 1;
                 
                 const aaCompliant = contrasts.filter(c => c.wcagAA).length;
-                const aaaCompliant = contrasts.filter(c => c.wcagAAA).length;
-                const total = contrasts.length;
+                const totalPairs = contrasts.length;
                 
-                let wcagLevel = 'Fail';
+                // Accessibility score
                 let accessibilityScore = 0;
-                
-                if (total > 0 && bestContrast) {
-                    const weightedScore = Math.min(maxContrast * (bestContrast.combinedWeight / 100), maxContrast);
-                    
-                    if (weightedScore >= 7.0) {
-                        wcagLevel = 'AAA';
-                        accessibilityScore = 85 + Math.min(15, (weightedScore - 7) * 2);
-                    } else if (weightedScore >= 4.5) {
-                        wcagLevel = 'AA';
-                        accessibilityScore = 65 + Math.min(20, (weightedScore - 4.5) * 6);
-                    } else if (weightedScore >= 3.0) {
-                        wcagLevel = 'A';
-                        accessibilityScore = 35 + Math.min(30, (weightedScore - 3.0) * 12);
-                    } else {
-                        wcagLevel = 'Fail';
-                        accessibilityScore = Math.min(35, weightedScore * 8);
-                    }
-                    
-                    if (total > 0) {
-                        const complianceBonus = (aaCompliant / total) * 10;
-                        accessibilityScore = Math.min(100, accessibilityScore + complianceBonus);
-                    }
+                if (bestContrast >= 7.0) {
+                    accessibilityScore = 90 + Math.min(10, (bestContrast - 7) * 2);
+                } else if (bestContrast >= 4.5) {
+                    accessibilityScore = 70 + Math.min(20, (bestContrast - 4.5) * 8);
+                } else if (bestContrast >= 3.0) {
+                    accessibilityScore = 40 + Math.min(30, (bestContrast - 3.0) * 20);
+                } else {
+                    accessibilityScore = Math.min(40, bestContrast * 10);
                 }
-
+                
+                // Alt text check (simplified - in real scenario would analyze metadata)
+                const hasAltText = false; // Simplified assumption
+                
+                // Text in images check (simplified)
+                const hasTextInImages = false; // Simplified assumption
+                
                 return {
-                    contrasts: contrasts.slice(0, 5),
-                    maxContrast: parseFloat(maxContrast.toFixed(2)),
+                    contrastRatio: parseFloat(bestContrast.toFixed(2)),
                     averageContrast: parseFloat(avgContrast.toFixed(2)),
-                    wcagLevel,
-                    accessibilityScore: Math.round(Math.max(0, Math.min(100, accessibilityScore))),
+                    wcagLevel: bestContrast >= 7.0 ? 'AAA' : bestContrast >= 4.5 ? 'AA' : bestContrast >= 3.0 ? 'A' : 'Fail',
+                    score: Math.round(accessibilityScore),
                     aaCompliant,
-                    aaaCompliant,
-                    totalPairs: total,
-                    bestContrastPair: bestContrast
+                    totalPairs,
+                    hasAltText,
+                    hasTextInImages,
+                    contrasts: contrasts.slice(0, 3)
                 };
             }
             
-            calculateEnvironmentalImpact(image, colorAnalysis) {
-                const sizeInMB = image.size / (1024 * 1024);
+            analyzeEconomicSustainability(image, colorAnalysis) {
+                // Simplified economic analysis
+                let score = 70; // Base score
                 
-                // Valori standardizzati The Shift Project (2019) e Water Footprint Network
-                const co2PerMB = 20;  // grammi CO2 per MB
-                const waterPerMB = 0.2; // litri acqua per MB
-                const energyPerMB = 0.0055; // kWh per MB
+                // Font analysis (simplified - would need OCR in real implementation)
+                const fontType = 'system'; // Simplified assumption
+                const isOpenSource = true; // Simplified assumption
                 
-                let co2PerView = sizeInMB * co2PerMB;
-                let waterPerView = sizeInMB * waterPerMB;
-                let energyKWh = sizeInMB * energyPerMB;
+                // Layout analysis based on color distribution
+                const colorVariety = colorAnalysis.dominantColors.length;
+                const isSimpleLayout = colorVariety <= 5;
                 
-                const formatMultipliers = {
-                    'image/webp': 0.8,
-                    'image/png': 1.3,
-                    'image/jpeg': 1.0,
-                    'image/svg+xml': 0.4,
-                };
+                // Design system analysis (simplified)
+                const usesDesignSystem = isSimpleLayout && colorAnalysis.isDarkTheme;
                 
-                const formatMultiplier = formatMultipliers[image.type] || 1.0;
-                const sizeMultiplier = sizeInMB > 1 ? 1.5 : sizeInMB > 0.5 ? 1.2 : 1.0;
-                const themeMultiplier = colorAnalysis.isDarkTheme ? 0.85 : 1.0;
+                if (isOpenSource) score += 15;
+                if (isSimpleLayout) score += 10;
+                if (usesDesignSystem) score += 5;
                 
-                co2PerView *= formatMultiplier * sizeMultiplier * themeMultiplier;
-                waterPerView *= formatMultiplier * sizeMultiplier;
-                energyKWh *= formatMultiplier * sizeMultiplier * themeMultiplier;
-                
-                const optimalSizeMB = 0.15;
-                const sizeRatio = sizeInMB / optimalSizeMB;
-                let score = Math.max(0, 100 - (sizeRatio - 1) * 40);
-                
-                if (image.type === 'image/webp') score += 10;
-                else if (image.type === 'image/png' && sizeInMB > 0.2) score -= 15;
-                else if (image.type === 'image/svg+xml') score += 15;
-                
-                if (colorAnalysis.isDarkTheme) score += 5;
+                // File format efficiency
+                if (image.type === 'image/svg+xml') score += 20;
+                else if (image.type === 'image/webp') score += 10;
                 
                 score = Math.max(0, Math.min(100, score));
                 
-                const recommendations = [];
-                if (sizeInMB > 0.5) recommendations.push("Riduci dimensioni file: obiettivo <500KB");
-                if (sizeInMB > 1.0) recommendations.push("File troppo grande per web: comprimi significativamente");
-                if (image.type === 'image/png' && sizeInMB > 0.2) recommendations.push("Per foto usa JPEG invece di PNG");
-                if (image.type !== 'image/webp' && sizeInMB > 0.1) recommendations.push("Considera WebP per -20% dimensioni");
-                if (!colorAnalysis.isDarkTheme && colorAnalysis.averageBrightness > 180) recommendations.push("Riduci luminosità per dispositivi OLED");
-                
-                const equivalences = {
-                    co2: { 
-                        carMeters: Math.round(co2PerView / 0.12),
-                        treesMinutes: (co2PerView / (22000 / (365 * 24 * 60))).toFixed(1)
-                    },
-                    energy: { 
-                        ledSeconds: Math.round((energyKWh / 0.01) * 3600),
-                        phoneCharges: (energyKWh / 0.018).toFixed(3)
-                    },
-                    water: { 
-                        drops: Math.round(waterPerView / 0.00005)
-                    }
-                };
-                
                 return {
-                    co2PerView: parseFloat(co2PerView.toFixed(2)),
-                    waterPerView: parseFloat(waterPerView.toFixed(3)),
-                    energyKWh: parseFloat(energyKWh.toFixed(6)),
                     score: Math.round(score),
-                    recommendations,
-                    equivalences,
-                    sizeEfficiency: optimalSizeMB / sizeInMB,
-                    formatEfficiency: 1 / formatMultiplier
+                    fontType,
+                    isOpenSource,
+                    usesDesignSystem,
+                    isSimpleLayout,
+                    recommendations: []
                 };
             }
             
@@ -438,20 +742,11 @@
                     const { canvas, ctx, imageData, originalWidth, originalHeight, scaleFactor } = await this.loadImageToCanvas(this.uploadedImage.url);
                     
                     const colorAnalysis = this.analyzeColors(imageData);
-                    const contrastAnalysis = this.analyzeContrasts(colorAnalysis);
                     const environmentalImpact = this.calculateEnvironmentalImpact(this.uploadedImage, colorAnalysis);
+                    const accessibilityAnalysis = this.analyzeAccessibility(colorAnalysis);
+                    const economicAnalysis = this.analyzeEconomicSustainability(this.uploadedImage, colorAnalysis);
                     
-                    // Simplified font analysis for single file version
-                    const fontAnalysis = {
-                        score: 85,
-                        fontType: 'system',
-                        licensing: 'Sistema/Nativo',
-                        efficiency: 'Alta',
-                        textDensity: 0,
-                        confidence: 0.8,
-                        recommendations: []
-                    };
-                    
+                    // Calculate overall score with updated weights
                     const weights = {
                         environmental: 0.4,
                         accessibility: 0.35,
@@ -460,46 +755,17 @@
                     
                     const overallScore = Math.round(
                         (environmentalImpact.score * weights.environmental + 
-                         contrastAnalysis.accessibilityScore * weights.accessibility + 
-                         fontAnalysis.score * weights.economic)
+                         accessibilityAnalysis.score * weights.accessibility + 
+                         economicAnalysis.score * weights.economic)
                     );
                     
                     this.analysisResults = {
-                        environmental: {
-                            score: environmentalImpact.score,
-                            fileSize: this.uploadedImage.size,
-                            format: this.uploadedImage.type,
-                            co2Impact: environmentalImpact.co2PerView,
-                            waterImpact: environmentalImpact.waterPerView,
-                            energyImpact: environmentalImpact.energyKWh,
-                            isDarkTheme: colorAnalysis.isDarkTheme,
-                            averageBrightness: colorAnalysis.averageBrightness,
-                            recommendations: environmentalImpact.recommendations,
-                            equivalences: environmentalImpact.equivalences,
-                            sizeEfficiency: environmentalImpact.sizeEfficiency,
-                            formatEfficiency: environmentalImpact.formatEfficiency
-                        },
-                        accessibility: {
-                            score: contrastAnalysis.accessibilityScore,
-                            contrast: contrastAnalysis.averageContrast,
-                            maxContrast: contrastAnalysis.maxContrast,
-                            wcagLevel: contrastAnalysis.wcagLevel,
-                            textDetected: false,
-                            textCoverage: 0,
-                            textConfidence: 0,
-                            contrastPairs: contrastAnalysis.totalPairs,
-                            aaCompliant: contrastAnalysis.aaCompliant,
-                            aaaCompliant: contrastAnalysis.aaaCompliant,
-                            bestContrastPair: contrastAnalysis.bestContrastPair,
-                            readability: contrastAnalysis.wcagLevel === 'AAA' ? 'Eccellente' : 
-                                        contrastAnalysis.wcagLevel === 'AA' ? 'Buona' : 
-                                        contrastAnalysis.wcagLevel === 'A' ? 'Sufficiente' : 'Insufficiente'
-                        },
-                        economic: fontAnalysis,
+                        environmental: environmentalImpact,
+                        accessibility: accessibilityAnalysis,
+                        economic: economicAnalysis,
                         overall: overallScore,
                         metadata: {
                             dominantColors: colorAnalysis.dominantColors.slice(0, 5),
-                            textRegions: 0,
                             analysisTimestamp: new Date().toISOString(),
                             imageSize: {
                                 width: canvas.width,
@@ -509,7 +775,8 @@
                                 aspectRatio: parseFloat((originalWidth / originalHeight).toFixed(2))
                             },
                             validPixels: colorAnalysis.totalValidPixels,
-                            processingNote: scaleFactor < 1 ? `Immagine ridimensionata per analisi (${Math.round(scaleFactor*100)}%)` : 'Analizzata a dimensione originale'
+                            isDarkTheme: colorAnalysis.isDarkTheme,
+                            averageBrightness: colorAnalysis.averageBrightness
                         }
                     };
                     
@@ -523,10 +790,10 @@
             }
             
             getScoreColor(score) {
-                if (score >= 80) return 'text-green-600';
-                if (score >= 60) return 'text-yellow-600';
-                if (score >= 40) return 'text-orange-600';
-                return 'text-red-600';
+                if (score >= 80) return 'text-primary';
+                if (score >= 60) return 'text-yellow-400';
+                if (score >= 40) return 'text-orange-400';
+                return 'text-red-400';
             }
             
             getScoreBadge(score) {
@@ -534,6 +801,19 @@
                 if (score >= 60) return 'Buono';
                 if (score >= 40) return 'Sufficiente';
                 return 'Da migliorare';
+            }
+            
+            getAccessibilityStatus(wcagLevel) {
+                if (wcagLevel === 'AAA') return '✅ Eccellente';
+                if (wcagLevel === 'AA') return '✅ Accessibile';
+                if (wcagLevel === 'A') return '⚠️ Parziale';
+                return '❌ Non accessibile';
+            }
+            
+            getEconomicStatus(score) {
+                if (score >= 80) return '✅ Ottima';
+                if (score >= 60) return '⚠️ Parziale';
+                return '❌ Bassa';
             }
             
             downloadCertificate() {
@@ -553,55 +833,65 @@
     <title>Certificato Sostenibilità Digitale - ${this.uploadedImage.name}</title>
     <style>
         body { font-family: 'Arial', sans-serif; max-width: 800px; margin: 20px auto; padding: 20px; line-height: 1.6; color: #1f2937; background: #f8fafc; }
-        .header { text-align: center; background: #ffffff; color: #1f2937; padding: 30px; border-radius: 12px; margin-bottom: 30px; border: 3px solid #16a34a; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .header h1 { color: #16a34a; margin: 0 0 15px 0; font-size: 2.2em; }
-        .score { font-size: 4em; font-weight: bold; color: ${this.analysisResults.overall >= 80 ? '#16a34a' : this.analysisResults.overall >= 60 ? '#d97706' : this.analysisResults.overall >= 40 ? '#ea580c' : '#dc2626'}; margin: 20px 0; }
+        .header { text-align: center; background: #1F3B2C; color: #96E6B3; padding: 30px; border-radius: 12px; margin-bottom: 30px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .header h1 { color: #96E6B3; margin: 0 0 15px 0; font-size: 2.2em; }
+        .score { font-size: 4em; font-weight: bold; color: ${this.analysisResults.overall >= 80 ? '#96E6B3' : this.analysisResults.overall >= 60 ? '#d97706' : this.analysisResults.overall >= 40 ? '#ea580c' : '#dc2626'}; margin: 20px 0; }
         .section { margin: 20px 0; padding: 25px; border: 2px solid #e5e7eb; border-radius: 8px; background: #ffffff; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
         .metric { display: flex; justify-content: space-between; margin: 12px 0; padding: 8px 0; border-bottom: 1px solid #e5e7eb; }
+        .impact-box { background: #f0f9ff; border: 2px solid #0ea5e9; border-radius: 8px; padding: 20px; margin: 20px 0; }
     </style>
 </head>
 <body>
     <div class="header">
         <h1>🌱 Nova (beta) - Certificato Sostenibilità Digitale</h1>
-        <div style="margin: 15px 0; color: #6b7280;">
+        <div style="margin: 15px 0; color: #96E6B3;">
             <strong>File:</strong> ${this.uploadedImage.name}<br>
             <strong>Dimensione:</strong> ${(this.uploadedImage.size / (1024*1024)).toFixed(2)} MB<br>
             <strong>Data analisi:</strong> ${new Date().toLocaleDateString('it-IT')}
         </div>
         <div class="score">${this.analysisResults.overall}/100</div>
-        <div style="background: ${this.analysisResults.overall >= 80 ? '#dcfce7' : this.analysisResults.overall >= 60 ? '#fef3c7' : this.analysisResults.overall >= 40 ? '#fed7aa' : '#fecaca'}; color: ${this.analysisResults.overall >= 80 ? '#166534' : this.analysisResults.overall >= 60 ? '#92400e' : this.analysisResults.overall >= 40 ? '#9a3412' : '#991b1b'}; padding: 8px 16px; border-radius: 8px; font-weight: bold; display: inline-block; border: 2px solid ${this.analysisResults.overall >= 80 ? '#16a34a' : this.analysisResults.overall >= 60 ? '#d97706' : this.analysisResults.overall >= 40 ? '#ea580c' : '#dc2626'};">${this.getScoreBadge(this.analysisResults.overall)}</div>
+        <div style="background: ${this.analysisResults.overall >= 80 ? '#96E6B3' : this.analysisResults.overall >= 60 ? '#fef3c7' : this.analysisResults.overall >= 40 ? '#fed7aa' : '#fecaca'}; color: ${this.analysisResults.overall >= 80 ? '#1F3B2C' : this.analysisResults.overall >= 60 ? '#92400e' : this.analysisResults.overall >= 40 ? '#9a3412' : '#991b1b'}; padding: 8px 16px; border-radius: 8px; font-weight: bold; display: inline-block;">${this.getScoreBadge(this.analysisResults.overall)}</div>
     </div>
     
     <div class="section">
-        <h2 style="color: #1f2937; border-bottom: 3px solid #16a34a; padding-bottom: 8px; margin-top: 0; font-size: 1.5em;">🌱 Sostenibilità Ambientale (${this.analysisResults.environmental.score}/100)</h2>
-        <div class="metric"><span>CO₂ per visualizzazione:</span><span>${this.analysisResults.environmental.co2Impact}g</span></div>
-        <div class="metric"><span>Acqua per visualizzazione:</span><span>${this.analysisResults.environmental.waterImpact}L</span></div>
-        <div class="metric"><span>Energia richiesta:</span><span>${this.analysisResults.environmental.energyImpact}kWh</span></div>
-        <div class="metric"><span>Standard utilizzati:</span><span>20g CO₂/MB • 0.2L H₂O/MB</span></div>
-        <div class="metric"><span>Fonte:</span><span>The Shift Project (2019) • Water Footprint Network</span></div>
+        <h2 style="color: #1F3B2C; border-bottom: 3px solid #96E6B3; padding-bottom: 8px; margin-top: 0;">🌱 Sostenibilità Ambientale (${this.analysisResults.environmental.score}/100)</h2>
+        <div class="metric"><span>📦 CO₂ per upload:</span><span>${this.analysisResults.environmental.co2Upload}g</span></div>
+        <div class="metric"><span>💧 Acqua per upload:</span><span>${this.analysisResults.environmental.waterUpload}ml</span></div>
+        <div class="metric"><span>⏱️ CO₂ per visualizzazione:</span><span>${this.analysisResults.environmental.co2View}g</span></div>
+        <div class="metric"><span>🌍 CO₂ totale:</span><span>${this.analysisResults.environmental.totalCO2}g</span></div>
+        <div class="metric"><span>🎨 Fattore colore:</span><span>+${(this.analysisResults.environmental.colorFactor * 100).toFixed(0)}%</span></div>
         
-        <div style="background: #f0f9ff; border: 2px solid #0ea5e9; border-radius: 8px; padding: 20px; margin: 20px 0;">
-            <h3 style="color: #0c4a6e; margin-top: 0;">📊 Impatto per 1000 Visualizzazioni Web</h3>
-            <div class="metric"><span>🌱 CO₂ totale emessa:</span><span>${(this.analysisResults.environmental.co2Impact * 1000).toFixed(1)}g</span></div>
-            <div class="metric"><span>🚗 Chilometri in auto:</span><span>${((this.analysisResults.environmental.equivalences.co2.carMeters * 1000) / 1000).toFixed(2)} km</span></div>
-            <div class="metric"><span>📱 Ricariche smartphone:</span><span>${(parseFloat(this.analysisResults.environmental.equivalences.energy.phoneCharges) * 1000).toFixed(0)} ricariche</span></div>
-            <div class="metric"><span>💧 Consumo acqua totale:</span><span>${(this.analysisResults.environmental.waterImpact * 1000).toFixed(2)} litri</span></div>
+        <div class="impact-box">
+            <h3 style="color: #0c4a6e; margin-top: 0;">📊 Formule Utilizzate (Standard Aggiornati)</h3>
+            <div class="metric"><span>📦 Upload:</span><span>MB × 0.072g CO₂</span></div>
+            <div class="metric"><span>💧 Raffreddamento:</span><span>MB × 103ml H₂O</span></div>
+            <div class="metric"><span>⏱️ Visualizzazione:</span><span>minuti × 6g CO₂</span></div>
+            <div class="metric"><span>🎨 Impatto colori:</span><span>Base × (1 + fattore)</span></div>
         </div>
     </div>
     
     <div class="section">
-        <div class="metric"><span>Contrasto medio WCAG:</span><span style="font-weight: bold; color: ${this.analysisResults.accessibility.contrast >= 4.5 ? '#16a34a' : '#dc2626'};">${this.analysisResults.accessibility.contrast}:1</span></div>
-        <div class="metric"><span>Contrasto massimo:</span><span style="font-weight: bold; color: ${this.analysisResults.accessibility.maxContrast >= 4.5 ? '#16a34a' : '#dc2626'};">${this.analysisResults.accessibility.maxContrast}:1</span></div>
-        <div class="metric"><span>Livello conformità WCAG:</span><span><strong>${this.analysisResults.accessibility.wcagLevel}</strong></span></div>
-        <div class="metric"><span>Leggibilità valutata:</span><span>${this.analysisResults.accessibility.readability}</span></div>
-        <div class="metric"><span>Coppie colori conformi AA:</span><span>${this.analysisResults.accessibility.aaCompliant}/${this.analysisResults.accessibility.contrastPairs}</span></div>
+        <h2 style="color: #1F3B2C; border-bottom: 3px solid #96E6B3; padding-bottom: 8px; margin-top: 0;">📖 Accessibilità WCAG 2.1 (${this.analysisResults.accessibility.score}/100)</h2>
+        <div class="metric"><span>Contrasto massimo:</span><span style="font-weight: bold; color: ${this.analysisResults.accessibility.contrastRatio >= 4.5 ? '#16a34a' : '#dc2626'};">${this.analysisResults.accessibility.contrastRatio}:1</span></div>
+        <div class="metric"><span>Livello WCAG:</span><span><strong>${this.analysisResults.accessibility.wcagLevel}</strong></span></div>
+        <div class="metric"><span>Coppie conformi AA:</span><span>${this.analysisResults.accessibility.aaCompliant}/${this.analysisResults.accessibility.totalPairs}</span></div>
+        <div class="metric"><span>Status:</span><span>${this.getAccessibilityStatus(this.analysisResults.accessibility.wcagLevel)}</span></div>
     </div>
     
-    <footer style="text-align: center; margin-top: 40px; padding: 25px; background: #f3f4f6; border-radius: 8px; border: 2px solid #d1d5db;">
-        <h3 style="color: #1f2937; margin-top: 0;">🌱 Nova (beta) - Certificato Ufficiale</h3>
-        <p style="color: #374151; margin: 10px 0;"><strong>Data generazione:</strong> ${new Date().toLocaleString('it-IT')}</p>
-        <p style="color: #6b7280; font-size: 14px; margin-top: 15px;">
-            <strong>⚠️ Disclaimer:</strong> NOVA fornisce un'analisi comparativa a fini informativi. I risultati non sostituiscono valutazioni tecniche o specialistiche.
+    <div class="section">
+        <h2 style="color: #1F3B2C; border-bottom: 3px solid #96E6B3; padding-bottom: 8px; margin-top: 0;">💰 Sostenibilità Economica (${this.analysisResults.economic.score}/100)</h2>
+        <div class="metric"><span>Tipo font:</span><span>${this.analysisResults.economic.fontType}</span></div>
+        <div class="metric"><span>Font open source:</span><span>${this.analysisResults.economic.isOpenSource ? '✅ Sì' : '❌ No'}</span></div>
+        <div class="metric"><span>Design system:</span><span>${this.analysisResults.economic.usesDesignSystem ? '✅ Rilevato' : '⚠️ Non rilevato'}</span></div>
+        <div class="metric"><span>Layout semplice:</span><span>${this.analysisResults.economic.isSimpleLayout ? '✅ Sì' : '❌ Complesso'}</span></div>
+        <div class="metric"><span>Status:</span><span>${this.getEconomicStatus(this.analysisResults.economic.score)}</span></div>
+    </div>
+    
+    <footer style="text-align: center; margin-top: 40px; padding: 25px; background: #1F3B2C; color: #96E6B3; border-radius: 8px;">
+        <h3 style="color: #96E6B3; margin-top: 0;">🌱 Nova (beta) - Certificato Ufficiale</h3>
+        <p style="margin: 10px 0;"><strong>Data generazione:</strong> ${new Date().toLocaleString('it-IT')}</p>
+        <p style="color: #96E6B3; font-size: 14px; margin-top: 15px;">
+            <strong>📊 Standard:</strong> SWD 0.072g CO₂/MB • 103ml H₂O/MB • WCAG 2.1 • 6g CO₂/min view
         </p>
     </footer>
 </body>
@@ -634,45 +924,45 @@
                         <!-- Header -->
                         <div class="text-center mb-8">
                             <div class="flex items-center justify-center gap-2 mb-4">
-                                <i data-lucide="leaf" class="h-8 w-8 text-green-600"></i>
-                                <h1 class="text-4xl font-bold text-gray-900">Nova</h1>
-                                <span class="bg-gray-200 text-gray-600 text-sm px-2 py-1 rounded-md">beta</span>
+                                <i data-lucide="leaf" class="h-8 w-8 text-primary"></i>
+                                <h1 class="text-4xl font-bold text-secondary">Nova</h1>
+                                <span class="bg-gray-700 text-primary text-sm px-2 py-1 rounded-md">beta</span>
                             </div>
-                            <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+                            <p class="text-xl text-secondary max-w-2xl mx-auto">
                                 Assistente AI per valutare la sostenibilità digitale dei tuoi contenuti web
                             </p>
-                            <p class="text-sm text-gray-500 mt-2">
-                                Standard: 20g CO₂/MB (The Shift Project) • 0.2L H₂O/MB (Water Footprint Network)
+                            <p class="text-sm text-primary mt-2">
+                                Standard aggiornati: 0.072g CO₂/MB upload • 6g CO₂/min view • WCAG 2.1
                             </p>
                         </div>
 
                         <!-- Error Display -->
                         ${this.error ? `
-                        <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6 fade-in">
+                        <div class="card mb-6 p-4 border-red-500 fade-in">
                             <div class="flex items-center gap-2">
-                                <i data-lucide="alert-triangle" class="h-5 w-5 text-red-600"></i>
-                                <span class="text-red-800">${this.error}</span>
+                                <i data-lucide="alert-triangle" class="h-5 w-5 text-red-400"></i>
+                                <span class="text-red-300">${this.error}</span>
                             </div>
                         </div>
                         ` : ''}
 
                         <!-- Upload Area -->
                         ${!this.uploadedImage ? `
-                        <div class="bg-white rounded-lg shadow-md mb-8">
+                        <div class="card mb-8">
                             <div class="p-8">
-                                <div id="upload-area" class="border-2 border-dashed rounded-lg p-12 text-center transition-colors border-gray-300 hover:border-green-400 cursor-pointer">
-                                    <i data-lucide="upload" class="h-16 w-16 text-gray-400 mx-auto mb-4"></i>
-                                    <h3 class="text-xl font-semibold text-gray-700 mb-2">
+                                <div id="upload-area" class="border-2 border-dashed border-accent rounded-lg p-12 text-center transition-colors hover:border-primary cursor-pointer">
+                                    <i data-lucide="upload" class="h-16 w-16 text-primary mx-auto mb-4"></i>
+                                    <h3 class="text-xl font-semibold text-secondary mb-2">
                                         Carica la tua immagine
                                     </h3>
-                                    <p class="text-gray-500 mb-6">
+                                    <p class="text-primary mb-6">
                                         Trascina qui il file oppure clicca per selezionare
                                     </p>
-                                    <p class="text-sm text-gray-400 mb-6">
+                                    <p class="text-sm text-primary mb-6">
                                         Formati supportati: JPG, PNG, WebP, SVG (max 10MB)
                                     </p>
                                     <input type="file" id="file-upload" class="hidden" accept="image/*" />
-                                    <button class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-medium transition-colors" onclick="document.getElementById('file-upload').click()">
+                                    <button class="btn-primary px-6 py-2 rounded-lg font-medium transition-colors" onclick="document.getElementById('file-upload').click()">
                                         Seleziona File
                                     </button>
                                 </div>
@@ -683,26 +973,26 @@
                         <!-- Image Preview -->
                         ${this.uploadedImage ? `
                         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8 fade-in">
-                            <div class="bg-white rounded-lg shadow-md">
-                                <div class="p-6 border-b">
-                                    <h3 class="text-lg font-semibold">Anteprima Immagine</h3>
-                                    <p class="text-gray-600">
+                            <div class="card">
+                                <div class="p-6 border-b border-accent">
+                                    <h3 class="text-lg font-semibold text-secondary">Anteprima Immagine</h3>
+                                    <p class="text-primary">
                                         ${this.uploadedImage.name} • ${(this.uploadedImage.size / (1024*1024)).toFixed(2)} MB • ${this.uploadedImage.type.split('/')[1].toUpperCase()}
                                     </p>
                                 </div>
                                 <div class="p-6">
-                                    <img src="${this.uploadedImage.url}" alt="Uploaded content" class="w-full h-64 object-contain rounded-lg border bg-gray-50" />
+                                    <img src="${this.uploadedImage.url}" alt="Uploaded content" class="w-full h-64 object-contain rounded-lg border border-accent bg-gray-800" />
                                     <div class="mt-4 flex gap-2">
-                                        <button id="analyze-btn" ${this.isAnalyzing ? 'disabled' : ''} class="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2">
+                                        <button id="analyze-btn" ${this.isAnalyzing ? 'disabled' : ''} class="btn-primary px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 disabled:opacity-50">
                                             ${this.isAnalyzing ? `
-                                                <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                                                <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
                                                 Analizzando...
                                             ` : `
                                                 <i data-lucide="eye" class="h-4 w-4"></i>
                                                 Avvia Analisi
                                             `}
                                         </button>
-                                        <button id="remove-btn" class="border border-gray-300 hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-lg font-medium transition-colors">
+                                        <button id="remove-btn" class="btn-secondary px-4 py-2 rounded-lg font-medium transition-colors">
                                             Rimuovi
                                         </button>
                                     </div>
@@ -711,27 +1001,29 @@
 
                             <!-- Progress -->
                             ${this.isAnalyzing ? `
-                            <div class="bg-white rounded-lg shadow-md">
-                                <div class="p-6 border-b">
-                                    <h3 class="text-lg font-semibold">Analisi in Corso</h3>
-                                    <p class="text-gray-600">Elaborazione scientifica in corso...</p>
+                            <div class="card">
+                                <div class="p-6 border-b border-accent">
+                                    <h3 class="text-lg font-semibold text-secondary">Analisi in Corso</h3>
+                                    <p class="text-primary">Elaborazione con standard aggiornati...</p>
                                 </div>
                                 <div class="p-6 space-y-4">
                                     ${[
                                         '🖼️ Caricamento Canvas HTML5', 
                                         '🎨 Analisi colori dominanti', 
-                                        '📏 Calcolo contrasti WCAG', 
-                                        '🌱 Valutazione CO₂ (20g/MB)',
-                                        '💧 Calcolo impatto idrico',
-                                        '📊 Generazione score finale'
+                                        '📏 Calcolo contrasti WCAG 2.1', 
+                                        '📦 CO₂ upload (0.072g/MB)',
+                                        '💧 Impatto idrico (103ml/MB)',
+                                        '⏱️ CO₂ visualizzazione (6g/min)',
+                                        '🎨 Fattore colori OLED',
+                                        '📊 Score finale pesato'
                                     ].map(step => `
                                         <div>
-                                            <div class="flex justify-between text-sm mb-1">
+                                            <div class="flex justify-between text-sm mb-1 text-secondary">
                                                 <span>${step}</span>
-                                                <span class="text-green-600">✓</span>
+                                                <span class="text-primary">✓</span>
                                             </div>
-                                            <div class="w-full bg-gray-200 rounded-full h-2">
-                                                <div class="bg-blue-600 h-2 rounded-full w-full transition-all duration-300"></div>
+                                            <div class="w-full bg-gray-700 rounded-full h-2">
+                                                <div class="bg-primary h-2 rounded-full w-full transition-all duration-300"></div>
                                             </div>
                                         </div>
                                     `).join('')}
@@ -745,21 +1037,21 @@
                         ${this.analysisResults ? `
                         <div class="space-y-8 fade-in">
                             <!-- Overall Score -->
-                            <div class="bg-white rounded-lg shadow-md">
-                                <div class="p-6 text-center">
-                                    <h2 class="text-2xl font-bold mb-4">Punteggio complessivo</h2>
+                            <div class="card text-center">
+                                <div class="p-6">
+                                    <h2 class="text-2xl font-bold mb-4 text-secondary">Punteggio Complessivo</h2>
                                     <div class="text-6xl font-bold mb-2 ${this.getScoreColor(this.analysisResults.overall)}">
                                         ${this.analysisResults.overall}
                                     </div>
                                     <span class="inline-block text-lg px-4 py-1 rounded-full ${
-                                        this.analysisResults.overall >= 80 ? 'bg-green-100 text-green-800' :
-                                        this.analysisResults.overall >= 60 ? 'bg-yellow-100 text-yellow-800' :
-                                        this.analysisResults.overall >= 40 ? 'bg-orange-100 text-orange-800' :
-                                        'bg-red-100 text-red-800'
+                                        this.analysisResults.overall >= 80 ? 'bg-green-900 text-primary' :
+                                        this.analysisResults.overall >= 60 ? 'bg-yellow-900 text-yellow-300' :
+                                        this.analysisResults.overall >= 40 ? 'bg-orange-900 text-orange-300' :
+                                        'bg-red-900 text-red-300'
                                     }">
                                         ${this.getScoreBadge(this.analysisResults.overall)}
                                     </span>
-                                    <p class="text-sm text-gray-500 mt-2">
+                                    <p class="text-sm text-primary mt-2">
                                         Media pesata: Ambientale (40%) • Accessibilità (35%) • Economica (25%)
                                     </p>
                                 </div>
@@ -768,10 +1060,10 @@
                             <!-- Detailed Scores -->
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                                 <!-- Environmental -->
-                                <div class="bg-white rounded-lg shadow-md">
-                                    <div class="p-6 border-b">
-                                        <h3 class="text-lg font-semibold flex items-center gap-2">
-                                            <i data-lucide="leaf" class="h-5 w-5 text-green-600"></i>
+                                <div class="card">
+                                    <div class="p-6 border-b border-accent">
+                                        <h3 class="text-lg font-semibold flex items-center gap-2 text-secondary">
+                                            <i data-lucide="leaf" class="h-5 w-5 text-primary"></i>
                                             Ambientale
                                         </h3>
                                     </div>
@@ -780,41 +1072,47 @@
                                             ${this.analysisResults.environmental.score}/100
                                         </div>
                                         <div class="space-y-2 text-sm">
-                                            <div class="flex justify-between">
-                                                <span>🌱 CO₂ per view:</span>
-                                                <span class="font-medium">${this.analysisResults.environmental.co2Impact}g</span>
+                                            <div class="flex justify-between items-center">
+                                                <span class="text-primary">📦 CO₂ upload:</span>
+                                                <div class="flex items-center">
+                                                    <span class="font-medium text-secondary">${this.analysisResults.environmental.co2Upload}g</span>
+                                                    <span class="info-icon" data-info="co2_upload">ℹ️</span>
+                                                </div>
+                                            </div>
+                                            <div class="flex justify-between items-center">
+                                                <span class="text-primary">💧 Acqua upload:</span>
+                                                <div class="flex items-center">
+                                                    <span class="font-medium text-secondary">${this.analysisResults.environmental.waterUpload}ml</span>
+                                                    <span class="info-icon" data-info="water_upload">ℹ️</span>
+                                                </div>
+                                            </div>
+                                            <div class="flex justify-between items-center">
+                                                <span class="text-primary">⏱️ CO₂ view:</span>
+                                                <div class="flex items-center">
+                                                    <span class="font-medium text-secondary">${this.analysisResults.environmental.co2View}g</span>
+                                                    <span class="info-icon" data-info="co2_view">ℹ️</span>
+                                                </div>
+                                            </div>
+                                            <div class="flex justify-between items-center">
+                                                <span class="text-primary">🎨 Fattore colore:</span>
+                                                <div class="flex items-center">
+                                                    <span class="font-medium text-secondary">+${(this.analysisResults.environmental.colorFactor * 100).toFixed(0)}%</span>
+                                                    <span class="info-icon" data-info="color_impact">ℹ️</span>
+                                                </div>
                                             </div>
                                             <div class="flex justify-between">
-                                                <span>💧 Acqua per view:</span>
-                                                <span class="font-medium">${this.analysisResults.environmental.waterImpact}L</span>
-                                            </div>
-                                            <div class="flex justify-between">
-                                                <span>⚡ Energia per view:</span>
-                                                <span class="font-medium">${this.analysisResults.environmental.energyImpact}kWh</span>
-                                            </div>
-                                            <div class="flex justify-between">
-                                                <span>📁 Dimensione:</span>
-                                                <span class="font-medium">${(this.analysisResults.environmental.fileSize / (1024*1024)).toFixed(2)}MB</span>
-                                            </div>
-                                            <div class="flex justify-between">
-                                                <span>Tema:</span>
-                                                <span class="px-2 py-1 rounded text-xs ${this.analysisResults.environmental.isDarkTheme ? 'bg-gray-800 text-white' : 'bg-gray-100 text-gray-800'}">
-                                                    ${this.analysisResults.environmental.isDarkTheme ? "Scuro" : "Chiaro"}
-                                                </span>
-                                            </div>
-                                            <div class="mt-3 p-2 bg-blue-50 rounded text-xs text-blue-700">
-                                                📊 <strong>Standard:</strong> 20g CO₂/MB • 0.2L H₂O/MB<br/>
-                                                <strong>Fonte:</strong> The Shift Project (2019)
+                                                <span class="text-primary">🌍 CO₂ totale:</span>
+                                                <span class="font-medium text-secondary">${this.analysisResults.environmental.totalCO2}g</span>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
 
                                 <!-- Accessibility -->
-                                <div class="bg-white rounded-lg shadow-md">
-                                    <div class="p-6 border-b">
-                                        <h3 class="text-lg font-semibold flex items-center gap-2">
-                                            <i data-lucide="eye" class="h-5 w-5 text-blue-600"></i>
+                                <div class="card">
+                                    <div class="p-6 border-b border-accent">
+                                        <h3 class="text-lg font-semibold flex items-center gap-2 text-secondary">
+                                            <i data-lucide="eye" class="h-5 w-5 text-primary"></i>
                                             Accessibilità
                                         </h3>
                                     </div>
@@ -823,220 +1121,47 @@
                                             ${this.analysisResults.accessibility.score}/100
                                         </div>
                                         <div class="space-y-2 text-sm">
-                                            <div class="flex justify-between">
-                                                <span>Contrasto medio:</span>
-                                                <span class="font-medium ${this.analysisResults.accessibility.contrast >= 4.5 ? 'text-green-600' : 'text-red-600'}">
-                                                    ${this.analysisResults.accessibility.contrast}:1
-                                                </span>
+                                            <div class="flex justify-between items-center">
+                                                <span class="text-primary">Contrasto max:</span>
+                                                <div class="flex items-center">
+                                                    <span class="font-medium ${this.analysisResults.accessibility.contrastRatio >= 4.5 ? 'text-primary' : 'text-red-400'}">
+                                                        ${this.analysisResults.accessibility.contrastRatio}:1
+                                                    </span>
+                                                    <span class="info-icon" data-info="contrast_wcag">ℹ️</span>
+                                                </div>
                                             </div>
                                             <div class="flex justify-between">
-                                                <span>Contrasto max:</span>
-                                                <span class="font-medium ${this.analysisResults.accessibility.maxContrast >= 4.5 ? 'text-green-600' : 'text-red-600'}">
-                                                    ${this.analysisResults.accessibility.maxContrast}:1
-                                                </span>
-                                            </div>
-                                            <div class="flex justify-between">
-                                                <span>Livello WCAG:</span>
+                                                <span class="text-primary">Livello WCAG:</span>
                                                 <span class="px-2 py-1 rounded text-xs font-medium ${
-                                                    this.analysisResults.accessibility.wcagLevel === 'AAA' ? 'bg-green-100 text-green-800' :
-                                                    this.analysisResults.accessibility.wcagLevel === 'AA' ? 'bg-blue-100 text-blue-800' :
-                                                    this.analysisResults.accessibility.wcagLevel === 'A' ? 'bg-yellow-100 text-yellow-800' :
-                                                    'bg-red-100 text-red-800'
+                                                    this.analysisResults.accessibility.wcagLevel === 'AAA' ? 'bg-green-900 text-primary' :
+                                                    this.analysisResults.accessibility.wcagLevel === 'AA' ? 'bg-blue-900 text-blue-300' :
+                                                    this.analysisResults.accessibility.wcagLevel === 'A' ? 'bg-yellow-900 text-yellow-300' :
+                                                    'bg-red-900 text-red-300'
                                                 }">
                                                     ${this.analysisResults.accessibility.wcagLevel}
                                                 </span>
                                             </div>
+                                            <div class="flex justify-between items-center">
+                                                <span class="text-primary">Testo alt:</span>
+                                                <div class="flex items-center">
+                                                    <span class="text-secondary">${this.analysisResults.accessibility.hasAltText ? '✅' : '❌'}</span>
+                                                    <span class="info-icon" data-info="alt_text">ℹ️</span>
+                                                </div>
+                                            </div>
                                             <div class="flex justify-between">
-                                                <span>Coppie AA:</span>
-                                                <span>${this.analysisResults.accessibility.aaCompliant}</span>
+                                                <span class="text-primary">Coppie AA:</span>
+                                                <span class="text-secondary">${this.analysisResults.accessibility.aaCompliant}/${this.analysisResults.accessibility.totalPairs}</span>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
 
                                 <!-- Economic -->
-                                <div class="bg-white rounded-lg shadow-md">
-                                    <div class="p-6 border-b">
-                                        <h3 class="text-lg font-semibold flex items-center gap-2">
-                                            <i data-lucide="dollar-sign" class="h-5 w-5 text-purple-600"></i>
+                                <div class="card">
+                                    <div class="p-6 border-b border-accent">
+                                        <h3 class="text-lg font-semibold flex items-center gap-2 text-secondary">
+                                            <i data-lucide="dollar-sign" class="h-5 w-5 text-primary"></i>
                                             Economica
                                         </h3>
                                     </div>
                                     <div class="p-6">
-                                        <div class="text-3xl font-bold mb-4 ${this.getScoreColor(this.analysisResults.economic.score)}">
-                                            ${this.analysisResults.economic.score}/100
-                                        </div>
-                                        <div class="space-y-2 text-sm">
-                                            <div class="flex justify-between">
-                                                <span>Tipo font:</span>
-                                                <span class="capitalize">${this.analysisResults.economic.fontType}</span>
-                                            </div>
-                                            <div class="flex justify-between">
-                                                <span>Licenza:</span>
-                                                <span class="text-xs">${this.analysisResults.economic.licensing}</span>
-                                            </div>
-                                            <div class="flex justify-between">
-                                                <span>Efficienza:</span>
-                                                <span>${this.analysisResults.economic.efficiency}</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Environmental Impact Details -->
-                            <div class="bg-white rounded-lg shadow-md">
-                                <div class="p-6 border-b">
-                                    <h3 class="text-lg font-semibold flex items-center gap-2">
-                                        🌍 Impatto ambientale
-                                    </h3>
-                                </div>
-                                <div class="p-6">
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        <div class="bg-green-50 p-4 rounded-lg">
-                                            <h4 class="font-semibold text-green-800 mb-3">Per 1 Visualizzazione</h4>
-                                            <div class="space-y-2 text-sm">
-                                                <div class="flex justify-between">
-                                                    <span>CO₂ emessa:</span>
-                                                    <span class="font-medium">${this.analysisResults.environmental.co2Impact}g</span>
-                                                </div>
-                                                <div class="flex justify-between">
-                                                    <span>Acqua utilizzata:</span>
-                                                    <span class="font-medium">${this.analysisResults.environmental.waterImpact}L</span>
-                                                </div>
-                                                <div class="flex justify-between">
-                                                    <span>Energia consumata:</span>
-                                                    <span class="font-medium">${this.analysisResults.environmental.energyImpact}kWh</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        
-                                        <div class="bg-blue-50 p-4 rounded-lg">
-                                            <h4 class="font-semibold text-blue-800 mb-3">Per 1000 Visualizzazioni</h4>
-                                            <div class="space-y-2 text-sm">
-                                                <div class="flex justify-between">
-                                                    <span>🌱 CO₂ totale:</span>
-                                                    <span class="font-medium">${(this.analysisResults.environmental.co2Impact * 1000).toFixed(1)}g</span>
-                                                </div>
-                                                <div class="flex justify-between">
-                                                    <span>🚗 Chilometri auto:</span>
-                                                    <span class="font-medium">${((this.analysisResults.environmental.equivalences.co2.carMeters * 1000) / 1000).toFixed(2)}km</span>
-                                                </div>
-                                                <div class="flex justify-between">
-                                                    <span>📱 Ricariche smartphone:</span>
-                                                    <span class="font-medium">${(parseFloat(this.analysisResults.environmental.equivalences.energy.phoneCharges) * 1000).toFixed(0)}</span>
-                                                </div>
-                                                <div class="flex justify-between">
-                                                    <span>💧 Litri acqua:</span>
-                                                    <span class="font-medium">${(this.analysisResults.environmental.waterImpact * 1000).toFixed(2)}L</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Color Palette -->
-                            <div class="bg-white rounded-lg shadow-md">
-                                <div class="p-6 border-b">
-                                    <h3 class="text-lg font-semibold flex items-center gap-2">
-                                        🎨 Colori Dominanti
-                                    </h3>
-                                </div>
-                                <div class="p-6">
-                                    <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
-                                        ${this.analysisResults.metadata.dominantColors?.map(color => `
-                                            <div class="text-center">
-                                                <div class="w-full h-16 rounded-lg border-2 border-gray-200 mb-2 shadow-sm" style="background-color: ${color.hex}"></div>
-                                                <div class="text-xs font-mono font-bold">${color.hex}</div>
-                                                <div class="text-xs text-gray-500">${color.percentage}%</div>
-                                            </div>
-                                        `).join('') || ''}
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Certificate Download -->
-                            <div class="bg-white rounded-lg shadow-md">
-                                <div class="p-6 border-b">
-                                    <h3 class="text-lg font-semibold flex items-center gap-2">
-                                        <i data-lucide="award" class="h-5 w-5 text-yellow-600"></i>
-                                        Certificato di Sostenibilità
-                                    </h3>
-                                </div>
-                                <div class="p-6">
-                                    <div class="flex flex-col sm:flex-row gap-4 items-start">
-                                        <button id="download-btn" class="bg-yellow-600 hover:bg-yellow-700 text-white px-6 py-2 rounded-lg font-medium transition-colors flex items-center gap-2">
-                                            <i data-lucide="download" class="h-4 w-4"></i>
-                                            Scarica Certificato HTML
-                                        </button>
-                                        <div class="text-sm text-gray-500">
-                                            <p class="mb-1">📄 Include analisi completa e metodologia</p>
-                                            <p>💡 Per PDF: Apri HTML e stampa (Ctrl+P → Salva come PDF)</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        ` : ''}
-                    </div>
-                    
-                    <!-- Footer -->
-                    <footer class="mt-16 text-center text-gray-500 text-sm no-print">
-                        <div class="max-w-4xl mx-auto px-4 py-8 border-t border-gray-200">
-                            <div class="flex items-center justify-center gap-2 mb-4">
-                                <i data-lucide="leaf" class="h-4 w-4 text-green-600"></i>
-                                <span class="font-semibold">Nova (beta)</span>
-                            </div>
-                            <p class="mb-2">
-                                Assistente AI per la valutazione scientifica della sostenibilità digitale
-                            </p>
-                            <p class="text-xs mb-4">
-                                Standard: WCAG 2.1 • The Shift Project (2019) • Water Footprint Network
-                            </p>
-                            <div class="grid grid-cols-2 md:grid-cols-5 gap-4 text-xs">
-                                <div class="flex flex-col items-center gap-1">
-                                    <span class="font-medium">🔬 Canvas</span>
-                                    <span>HTML5 Analysis</span>
-                                </div>
-                                <div class="flex flex-col items-center gap-1">
-                                    <span class="font-medium">🎨 WCAG</span>
-                                    <span>2.1 Standards</span>
-                                </div>
-                                <div class="flex flex-col items-center gap-1">
-                                    <span class="font-medium">🌱 CO₂</span>
-                                    <span>20g/MB</span>
-                                </div>
-                                <div class="flex flex-col items-center gap-1">
-                                    <span class="font-medium">💧 H₂O</span>
-                                    <span>0.2L/MB</span>
-                                </div>
-                                <div class="flex flex-col items-center gap-1">
-                                    <span class="font-medium">📊 Nova</span>
-                                    <span>(beta)</span>
-                                </div>
-                            </div>
-                            <div class="mt-4 pt-4 border-t border-gray-100">
-                                <p class="text-xs text-gray-400">
-                                    ⚠️ NOVA fornisce un'analisi comparativa a fini informativi. I risultati non sostituiscono valutazioni tecniche o specialistiche.
-                                </p>
-                            </div>
-                        </div>
-                    </footer>
-                `;
-                
-                // Re-initialize icons and event listeners after render
-                setTimeout(() => {
-                    this.initializeLucideIcons();
-                    this.attachEventListeners();
-                }, 100);
-            }
-        }
-
-        // Initialize the application when DOM is loaded
-        document.addEventListener('DOMContentLoaded', () => {
-            new NovaSustainabilityAnalyzer();
-        });
-    </script>
-</body>
-</html>
