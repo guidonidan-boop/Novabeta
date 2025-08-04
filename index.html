@@ -105,35 +105,35 @@
             }
 
             attachEventListeners() {
-                const appContainer = document.getElementById('app');
+                const appContainer = document.getElementById("app");
                 
                 // File upload events
-                appContainer.addEventListener('change', e => {
-                    if (e.target.id === 'file-upload') this.handleFileInput(e);
+                appContainer.addEventListener("change", e => {
+                    if (e.target.id === "file-upload") this.handleFileInput(e);
                 });
                 
                 // Drag and drop events
-                appContainer.addEventListener('dragenter', e => {
-                    if (e.target.closest('#upload-area')) this.handleDrag(e, true);
+                appContainer.addEventListener("dragenter", e => {
+                    if (e.target.closest("#upload-area")) this.handleDrag(e, true);
                 });
-                appContainer.addEventListener('dragover', e => {
-                    if (e.target.closest('#upload-area')) this.handleDrag(e, true);
+                appContainer.addEventListener("dragover", e => {
+                    if (e.target.closest("#upload-area")) this.handleDrag(e, true);
                 });
-                appContainer.addEventListener('dragleave', e => {
-                    if (e.target.closest('#upload-area')) this.handleDrag(e, false);
+                appContainer.addEventListener("dragleave", e => {
+                    if (e.target.closest("#upload-area")) this.handleDrag(e, false);
                 });
-                appContainer.addEventListener('drop', e => {
-                    if (e.target.closest('#upload-area')) this.handleDrop(e);
+                appContainer.addEventListener("drop", e => {
+                    if (e.target.closest("#upload-area")) this.handleDrop(e);
                 });
 
                 // Button clicks
-                appContainer.addEventListener('click', e => {
-                    if (e.target.closest('#analyze-btn')) this.analyzeFile();
-                    if (e.target.closest('#remove-btn')) this.removeFile();
-                    if (e.target.closest('#new-analysis-btn')) this.startNewAnalysis();
-                    if (e.target.closest('#download-cert-btn')) this.downloadCertificate();
+                appContainer.addEventListener("click", e => {
+                    if (e.target.closest("#analyze-btn")) this.analyzeFile();
+                    if (e.target.closest("#remove-btn")) this.removeFile();
+                    if (e.target.closest("#new-analysis-btn")) this.startNewAnalysis();
+                    if (e.target.closest("#download-cert-btn")) this.downloadCertificate();
                     
-                    const infoButton = e.target.closest('.info-btn');
+                    const infoButton = e.target.closest(".info-btn");
                     if (infoButton) {
                         e.preventDefault();
                         this.showModal(infoButton.dataset.modal);
@@ -141,13 +141,13 @@
                 });
 
                 // Modal events
-                document.body.addEventListener('click', e => {
-                    if (e.target.classList.contains('modal-close') || e.target.id === 'modal-backdrop') {
+                document.body.addEventListener("click", e => {
+                    if (e.target.classList.contains("modal-close") || e.target.id === "modal-backdrop") {
                         this.hideModal();
                     }
                 });
                 
-                document.addEventListener('keydown', e => {
+                document.addEventListener("keydown", e => {
                     if (e.key === "Escape") this.hideModal();
                 });
             }
@@ -155,9 +155,9 @@
             handleDrag(e, isActive) {
                 e.preventDefault();
                 e.stopPropagation();
-                const uploadArea = document.getElementById('upload-area');
+                const uploadArea = document.getElementById("upload-area");
                 if (uploadArea) {
-                    uploadArea.classList.toggle('drag-active', isActive);
+                    uploadArea.classList.toggle("drag-active", isActive);
                 }
             }
 
@@ -176,16 +176,16 @@
 
             handleFile(file) {
                 this.error = null;
-                const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/svg+xml', 'application/pdf'];
+                const validTypes = ["image/jpeg", "image/png", "image/webp", "image/svg+xml", "application/pdf"];
                 
                 if (!validTypes.includes(file.type)) {
-                    this.error = 'Formato file non supportato. Usa JPG, PNG, WebP, SVG o PDF.';
+                    this.error = "Formato file non supportato. Usa JPG, PNG, WebP, SVG o PDF.";
                     this.render();
                     return;
                 }
                 
                 if (file.size > 15 * 1024 * 1024) {
-                    this.error = 'File troppo grande. Dimensione massima: 15MB.';
+                    this.error = "File troppo grande. Dimensione massima: 15MB.";
                     this.render();
                     return;
                 }
@@ -202,7 +202,7 @@
                     this.render();
                 };
                 reader.onerror = () => {
-                    this.error = 'Errore durante la lettura del file.';
+                    this.error = "Errore durante la lettura del file.";
                     this.render();
                 };
                 reader.readAsDataURL(file);
@@ -260,8 +260,8 @@
                         timestamp: new Date().toISOString()
                     };
                 } catch (error) {
-                    console.error('Errore durante l\'analisi:', error);
-                    this.error = 'Si è verificato un errore durante l\'analisi.';
+                    console.error("Errore durante l'analisi:", error);
+                    this.error = "Si è verificato un errore durante l'analisi.";
                 }
                 
                 this.isAnalyzing = false;
@@ -340,9 +340,9 @@
                 if (!this.analysisResults) return;
                 
                 const certificateHTML = this.generateCertificateHTML();
-                const blob = new Blob([certificateHTML], { type: 'text/html' });
+                const blob = new Blob([certificateHTML], { type: "text/html" });
                 const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
+                const a = document.createElement("a");
                 a.href = url;
                 a.download = `nova-certificate-${this.uploadedFile.name}.html`;
                 document.body.appendChild(a);
@@ -379,7 +379,7 @@
             <div class="score">${overallScore}/100</div>
             <p><strong>${overallLabel}</strong></p>
             <p>File: ${this.uploadedFile.name}</p>
-            <p>Data: ${new Date().toLocaleDateString('it-IT')}</p>
+            <p>Data: ${new Date().toLocaleDateString("it-IT")}</p>
         </div>
         
         <div class="section">
@@ -394,16 +394,16 @@
         <div class="section">
             <h3>Accessibilità WCAG 2.1 (${accessibility.score}/100)</h3>
             <div class="metric"><span>Contrasto colore:</span><span>${accessibility.contrastRatio}:1</span></div>
-            <div class="metric"><span>Testo alternativo:</span><span>${accessibility.hasAltText ? '✓' : '○'}</span></div>
-            <div class="metric"><span>Testo in immagini:</span><span>${!accessibility.hasTextInImage ? '✓' : '○'}</span></div>
-            <div class="metric"><span>Leggibilità font:</span><span>${accessibility.fontReadability ? '✓' : '○'}</span></div>
+            <div class="metric"><span>Testo alternativo:</span><span>${accessibility.hasAltText ? "✓" : "○"}</span></div>
+            <div class="metric"><span>Testo in immagini:</span><span>${!accessibility.hasTextInImage ? "✓" : "○"}</span></div>
+            <div class="metric"><span>Leggibilità font:</span><span>${accessibility.fontReadability ? "✓" : "○"}</span></div>
         </div>
         
         <div class="section">
             <h3>Sostenibilità economica (${economic.score}/100)</h3>
-            <div class="metric"><span>Design system:</span><span>${economic.usesDesignSystem ? '✓' : '○'}</span></div>
-            <div class="metric"><span>Font open source:</span><span>${economic.usesOpenSourceFonts ? '✓' : '○'}</span></div>
-            <div class="metric"><span>Layout modulare:</span><span>${economic.hasSimpleLayout ? '✓' : '○'}</span></div>
+            <div class="metric"><span>Design system:</span><span>${economic.usesDesignSystem ? "✓" : "○"}</span></div>
+            <div class="metric"><span>Font open source:</span><span>${economic.usesOpenSourceFonts ? "✓" : "○"}</span></div>
+            <div class="metric"><span>Layout modulare:</span><span>${economic.hasSimpleLayout ? "✓" : "○"}</span></div>
         </div>
         
         <div class="footer">
@@ -416,15 +416,15 @@
             }
 
             getScoreLabel(score) {
-                if (score >= 85) return 'Ottimo';
-                if (score >= 70) return 'Buono';
-                if (score >= 60) return 'Sufficiente';
-                return 'Insufficiente';
+                if (score >= 85) return "Ottimo";
+                if (score >= 70) return "Buono";
+                if (score >= 60) return "Sufficiente";
+                return "Insufficiente";
             }
 
             // --- Rendering Functions ---
             render() {
-                const app = document.getElementById('app');
+                const app = document.getElementById("app");
                 if (!app) return;
 
                 app.innerHTML = `
@@ -437,14 +437,14 @@
                         </header>
 
                         <main class="w-full max-w-4xl mx-auto flex-grow">
-                            ${this.isAnalyzing ? this.renderLoader() : ''}
-                            ${!this.isAnalyzing && !this.uploadedFile ? this.renderUploadArea() : ''}
-                            ${!this.isAnalyzing && this.uploadedFile && !this.analysisResults ? this.renderFilePreview() : ''}
-                            ${this.error ? this.renderError() : ''}
-                            ${this.analysisResults ? this.renderResultsWithPreview() : ''}
+                            ${this.isAnalyzing ? this.renderLoader() : ""}
+                            ${!this.isAnalyzing && !this.uploadedFile ? this.renderUploadArea() : ""}
+                            ${!this.isAnalyzing && this.uploadedFile && !this.analysisResults ? this.renderFilePreview() : ""}
+                            ${this.error ? this.renderError() : ""}
+                            ${this.analysisResults ? this.renderResultsWithPreview() : ""}
                         </main>
                         
-                        ${this.analysisResults ? this.renderFooter() : ''}
+                        ${this.analysisResults ? this.renderFooter() : ""}
                     </div>
                     ${this.renderModals()}
                 `;
@@ -476,12 +476,12 @@
             }
 
             renderFilePreview() {
-                const isImage = this.uploadedFile.type.startsWith('image/');
+                const isImage = this.uploadedFile.type.startsWith("image/");
                 return `
                     <div class="bg-white/5 border border-white/20 rounded-2xl p-6 fade-in">
                         <div class="flex flex-col sm:flex-row items-center gap-6">
                             ${isImage ? 
-                                `<img src="${this.uploadedFile.url}" alt="Anteprima" class="w-20 h-20 object-cover rounded-lg border border-white/30">` :
+                                `<img src="${this.uploadedFile.url}" alt="Anteprima" class="w-20 h-20 object-contain rounded-lg border border-white/30">` :
                                 `<div class="w-20 h-20 flex items-center justify-center bg-white/10 rounded-lg border border-white/30">
                                     <div class="text-2xl text-[#96E6B3]">📄</div>
                                  </div>`
@@ -491,10 +491,10 @@
                                 <p class="text-white/70 mt-1">${(this.uploadedFile.size / 1024 / 1024).toFixed(2)} MB</p>
                             </div>
                             <div class="flex items-center gap-4 mt-4 sm:mt-0">
-                                <button id="remove-btn" class="text-white/70 hover:text-white transition-colors" title="Rimuovi file">
+                                <button id="remove-btn" class="text-white/70 hover:text-white transition-colors bg-transparent border-none p-0" title="Rimuovi file">
                                     🗑
                                 </button>
-                                <button id="analyze-btn" class="bg-[#96E6B3] text-[#1F3B2C] font-semibold py-3 px-8 rounded-lg hover:bg-white transition-colors">
+                                <button id="analyze-btn" class="bg-[#96E6B3] text-[#1F3B2C] font-semibold py-3 px-10 rounded-lg hover:bg-white transition-colors">
                                     Analizza
                                 </button>
                             </div>
@@ -504,7 +504,7 @@
             }
 
             renderResultsWithPreview() {
-                const isImage = this.uploadedFile.type.startsWith('image/');
+                const isImage = this.uploadedFile.type.startsWith("image/");
                 return `
                     <div class="fade-in">
                         <!-- File preview sticky -->
@@ -512,7 +512,7 @@
                             <div class="flex items-center justify-between">
                                     <div class="flex items-center gap-4">
                                         ${isImage ? 
-                                            `<img src="${this.uploadedFile.url}" alt="Anteprima" class="w-16 h-16 object-cover rounded border border-white/30">` :
+                                            `<img src="${this.uploadedFile.url}" alt="Anteprima" class="w-16 h-16 object-contain rounded border border-white/30">` :
                                             `<div class="w-16 h-16 flex items-center justify-center bg-white/10 rounded border border-white/30">
                                                 <div class="text-lg text-[#96E6B3]">📄</div>
                                              </div>`
@@ -565,11 +565,11 @@
                                 <span class="text-4xl font-bold text-white">${environmental.score}/100</span>
                             </div>
                             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-                                ${this.renderMetric('Peso del contenuto', `${environmental.fileWeightMB} MB`, 'file-weight')}
-                                ${this.renderMetric('CO₂ per upload', `${environmental.co2UploadG} g`, 'co2-upload')}
-                                ${this.renderMetric('CO₂ per visualizzazione', `${environmental.co2ViewColorG} g`, 'co2-view')}
-                                ${this.renderMetric('Acqua per upload', `${environmental.h2oUploadMl} ml`, 'h2o-upload')}
-                                ${this.renderMetric('Acqua per visualizzazione', `${environmental.h2oViewMl} ml`, 'h2o-view')}
+                                ${this.renderMetric("Peso del contenuto", `${environmental.fileWeightMB} MB`, "file-weight")}
+                                ${this.renderMetric("CO₂ per upload", `${environmental.co2UploadG} g`, "co2-upload")}
+                                ${this.renderMetric("CO₂ per visualizzazione", `${environmental.co2ViewColorG} g`, "co2-view")}
+                                ${this.renderMetric("Acqua per upload", `${environmental.h2oUploadMl} ml`, "h2o-upload")}
+                                ${this.renderMetric("Acqua per visualizzazione", `${environmental.h2oViewMl} ml`, "h2o-view")}
                             </div>
                         </div>
 
@@ -580,10 +580,10 @@
                                 <span class="text-4xl font-bold text-white">${accessibility.score}/100</span>
                             </div>
                             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-                                ${this.renderMetric('Contrasto colore', `${accessibility.contrastRatio}:1`, 'contrast')}
-                                ${this.renderMetric('Testo alternativo', accessibility.hasAltText ? '<span class="icon-check">✓</span>' : '<span class="icon-cross">○</span>', 'alt-text')}
-                                ${this.renderMetric('Testo in immagini', !accessibility.hasTextInImage ? '<span class="icon-check">✓</span>' : '<span class="icon-cross">○</span>', 'text-in-image')}
-                                ${this.renderMetric('Leggibilità font', accessibility.fontReadability ? '<span class="icon-check">✓</span>' : '<span class="icon-cross">○</span>', 'font-readability')}
+                                ${this.renderMetric("Contrasto colore", `${accessibility.contrastRatio}:1`, "contrast")}
+                                ${this.renderMetric("Testo alternativo", accessibility.hasAltText ? "<span class=\"icon-check\">✓</span>" : "<span class=\"icon-cross\">○</span>", "alt-text")}
+                                ${this.renderMetric("Testo in immagini", !accessibility.hasTextInImage ? "<span class=\"icon-check\">✓</span>" : "<span class=\"icon-cross\">○</span>", "text-in-image")}
+                                ${this.renderMetric("Leggibilità font", accessibility.fontReadability ? "<span class=\"icon-check\">✓</span>" : "<span class=\"icon-cross\">○</span>", "font-readability")}
                             </div>
                         </div>
 
@@ -594,9 +594,9 @@
                                 <span class="text-4xl font-bold text-white">${economic.score}/100</span>
                             </div>
                             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                                ${this.renderMetric('Design system', economic.usesDesignSystem ? '<span class="icon-check">✓</span>' : '<span class="icon-cross">○</span>', 'design-system')}
-                                ${this.renderMetric('Font open source', economic.usesOpenSourceFonts ? '<span class="icon-check">✓</span>' : '<span class="icon-cross">○</span>', 'open-fonts')}
-                                ${this.renderMetric('Layout modulare', economic.hasSimpleLayout ? '<span class="icon-check">✓</span>' : '<span class="icon-cross">○</span>', 'modular-layout')}
+                                ${this.renderMetric("Design system", economic.usesDesignSystem ? "<span class=\"icon-check\">✓</span>" : "<span class=\"icon-cross\">○</span>", "design-system")}
+                                ${this.renderMetric("Font open source", economic.usesOpenSourceFonts ? "<span class=\"icon-check\">✓</span>" : "<span class=\"icon-cross\">○</span>", "open-fonts")}
+                                ${this.renderMetric("Layout modulare", economic.hasSimpleLayout ? "<span class=\"icon-check\">✓</span>" : "<span class=\"icon-cross\">○</span>", "modular-layout")}
                             </div>
                         </div>
 
