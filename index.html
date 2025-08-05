@@ -374,11 +374,23 @@
                         let hasGoodContrast = false;
                         
                         if (sortedColors.length >= 2) {
-                            const color1 = sortedColors[0];
-                            const color2 = sortedColors[1];
+                            // Identifica il colore più scuro e il più chiaro tra i dominanti
+                            let darkestDominant = sortedColors[0];
+                            let lightestDominant = sortedColors[0];
+
+                            for (let i = 1; i < sortedColors.length; i++) {
+                                const currentColor = sortedColors[i];
+                                const currentLum = this.calculateLuminance(currentColor.r, currentColor.g, currentColor.b);
+                                if (currentLum < this.calculateLuminance(darkestDominant.r, darkestDominant.g, darkestDominant.b)) {
+                                    darkestDominant = currentColor;
+                                }
+                                if (currentLum > this.calculateLuminance(lightestDominant.r, lightestDominant.g, lightestDominant.b)) {
+                                    lightestDominant = currentColor;
+                                }
+                            }
                             
-                            const lum1 = this.calculateLuminance(color1.r, color1.g, color1.b);
-                            const lum2 = this.calculateLuminance(color2.r, color2.g, color2.b);
+                            const lum1 = this.calculateLuminance(lightestDominant.r, lightestDominant.g, lightestDominant.b);
+                            const lum2 = this.calculateLuminance(darkestDominant.r, darkestDominant.g, darkestDominant.b);
                             
                             contrastRatio = (Math.max(lum1, lum2) + 0.05) / (Math.min(lum1, lum2) + 0.05);
                             hasGoodContrast = contrastRatio >= 4.5;
