@@ -369,28 +369,16 @@
                         
                         const averageBrightness = totalBrightness / pixelCount;
                         
-                        // Calcola contrasto tra i due colori più comuni
+                        // Calcola contrasto tra i due colori più dominanti
                         let contrastRatio = 1.0;
                         let hasGoodContrast = false;
                         
                         if (sortedColors.length >= 2) {
-                            // Trova il colore più chiaro e più scuro tra i dominanti
-                            let lightestColor = sortedColors[0];
-                            let darkestColor = sortedColors[0];
-
-                            for (let i = 1; i < sortedColors.length; i++) {
-                                const currentColor = sortedColors[i];
-                                const currentLum = this.calculateLuminance(currentColor.r, currentColor.g, currentColor.b);
-                                if (currentLum > this.calculateLuminance(lightestColor.r, lightestColor.g, lightestColor.b)) {
-                                    lightestColor = currentColor;
-                                }
-                                if (currentLum < this.calculateLuminance(darkestColor.r, darkestColor.g, darkestColor.b)) {
-                                    darkestColor = currentColor;
-                                }
-                            }
+                            const color1 = sortedColors[0];
+                            const color2 = sortedColors[1];
                             
-                            const lum1 = this.calculateLuminance(lightestColor.r, lightestColor.g, lightestColor.b);
-                            const lum2 = this.calculateLuminance(darkestColor.r, darkestColor.g, darkestColor.b);
+                            const lum1 = this.calculateLuminance(color1.r, color1.g, color1.b);
+                            const lum2 = this.calculateLuminance(color2.r, color2.g, color2.b);
                             
                             contrastRatio = (Math.max(lum1, lum2) + 0.05) / (Math.min(lum1, lum2) + 0.05);
                             hasGoodContrast = contrastRatio >= 4.5;
