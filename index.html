@@ -533,10 +533,10 @@
                     wcagLevel = 'AA';
                 }
                 
-                // Simulazione altre verifiche accessibilità
-                const hasAltText = Math.random() > 0.3; // 70% probabilità
-                const hasTextInImage = Math.random() > 0.7; // 30% probabilità
-                const fontReadability = Math.random() > 0.2; // 80% probabilità
+                // Valori deterministici per le verifiche di accessibilità (simulazione)
+                const hasAltText = true; // Assumiamo che il testo alternativo sia sempre presente per coerenza
+                const hasTextInImage = false; // Assumiamo che non ci sia testo in immagini per coerenza
+                const fontReadability = true; // Assumiamo che la leggibilità del font sia sempre buona per coerenza
                 
                 if (!hasAltText) score -= 25;
                 if (hasTextInImage) score -= 15;
@@ -557,9 +557,9 @@
             }
 
             analyzeEconomicSustainability() {
-                // Simulazione analisi sostenibilità economica
-                const usesDesignSystem = Math.random() > 0.4; // 60% probabilità
-                const usesOpenSourceFonts = Math.random() > 0.3; // 70% probabilità
+                // Valori deterministici per l'analisi di sostenibilità economica (simulazione)
+                const usesDesignSystem = true; // Assumiamo che il design system sia sempre usato per coerenza
+                const usesOpenSourceFonts = true; // Assumiamo che i font open source siano sempre usati per coerenza
                 const hasSimpleLayout = this.uploadedFile.size < 2 * 1024 * 1024; // File < 2MB = layout semplice
                 
                 let score = 50; // Base score
