@@ -80,12 +80,33 @@
             font-weight: bold;
         }
         .icon-cross {
-            color: #ef4444;
+            color: white;
             font-weight: normal;
         }
         .icon-neutral {
             color: #fbbf24;
             font-weight: normal;
+        }
+        
+        /* Color swatch styling */
+        .color-swatch {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            display: inline-block;
+            margin-right: 8px;
+            vertical-align: middle;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Improved spacing for boxes */
+        .metric-box {
+            padding: 1.25rem;
+        }
+        
+        .recommendation-box {
+            padding: 1.25rem;
         }
         
         /* Canvas per analisi colore */
@@ -588,26 +609,36 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Certificato Nova - ${this.uploadedFile.name}</title>
     <style>
-        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; background: #f5f5f5; }
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; background: #f5f5f5; line-height: 1.6; }
         .certificate { background: white; padding: 40px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         .header { text-align: center; margin-bottom: 30px; }
-        .score { font-size: 48px; font-weight: bold; color: #96E6B3; }
-        .section { margin: 20px 0; padding: 15px; background: #f9f9f9; border-radius: 8px; }
-        .metric { display: flex; justify-content: space-between; margin: 10px 0; }
-        .footer { text-align: center; margin-top: 30px; font-size: 12px; color: #666; }
-        .wcag-level { background: #e8f4fd; padding: 4px 8px; border-radius: 4px; font-size: 12px; }
+        .score { font-size: 48px; font-weight: bold; color: #2d5a3d; margin: 20px 0; }
+        .section { margin: 25px 0; padding: 20px; background: #f9f9f9; border-radius: 8px; border: 1px solid #e0e0e0; }
+        .section h3 { color: #2d5a3d; margin-bottom: 15px; border-bottom: 2px solid #2d5a3d; padding-bottom: 10px; }
+        .metric { display: flex; justify-content: space-between; margin: 12px 0; padding: 8px 0; border-bottom: 1px solid #eee; }
+        .metric:last-child { border-bottom: none; }
+        .metric span:first-child { font-weight: 500; color: #333; }
+        .metric span:last-child { font-weight: bold; color: #2d5a3d; }
+        .footer { text-align: center; margin-top: 30px; font-size: 12px; color: #666; line-height: 1.4; }
+        .wcag-level { background: #e8f4fd; padding: 4px 8px; border-radius: 4px; font-size: 12px; color: #1565c0; border: 1px solid #bbdefb; }
+        .score-label { color: #2d5a3d; font-size: 24px; font-weight: 600; margin-top: 10px; }
+        .file-info { background: #f0f8f0; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #c8e6c9; }
+        .color-swatch-cert { width: 16px; height: 16px; border-radius: 3px; border: 1px solid #ccc; display: inline-block; margin-right: 6px; vertical-align: middle; }
     </style>
 </head>
 <body>
     <div class="certificate">
         <div class="header">
-            <h1>Certificato di sostenibilità digitale</h1>
-            <h2>Nova (beta)</h2>
+            <h1 style="color: #2d5a3d; margin-bottom: 10px;">Certificato di sostenibilità digitale</h1>
+            <h2 style="color: #666; font-weight: normal;">Nova (beta)</h2>
             <div class="score">${overallScore}/100</div>
-            <p><strong>${overallLabel}</strong></p>
-            <p>File: ${this.uploadedFile.name}</p>
-            <p>Dimensione: ${(this.uploadedFile.size / 1024 / 1024).toFixed(2)} MB</p>
-            <p>Data: ${new Date().toLocaleDateString('it-IT')}</p>
+            <div class="score-label">${overallLabel}</div>
+            
+            <div class="file-info">
+                <p><strong>File:</strong> ${this.uploadedFile.name}</p>
+                <p><strong>Dimensione:</strong> ${(this.uploadedFile.size / 1024 / 1024).toFixed(2)} MB</p>
+                <p><strong>Data analisi:</strong> ${new Date().toLocaleDateString('it-IT')}</p>
+            </div>
         </div>
         
         <div class="section">
@@ -627,7 +658,16 @@
             <div class="metric"><span>Testo alternativo:</span><span>${accessibility.hasAltText ? '✓ Presente' : '○ Assente'}</span></div>
             <div class="metric"><span>Testo in immagini:</span><span>${!accessibility.hasTextInImage ? '✓ Evitato' : '○ Presente'}</span></div>
             <div class="metric"><span>Leggibilità font:</span><span>${accessibility.fontReadability ? '✓ Buona' : '○ Problematica'}</span></div>
-            <div class="metric"><span>Colori dominanti:</span><span>${accessibility.dominantColors.join(', ')}</span></div>
+            ${accessibility.dominantColors && accessibility.dominantColors.length > 0 ? `
+                <div class="metric">
+                    <span>Colori dominanti:</span>
+                    <span>
+                        ${accessibility.dominantColors.map(color => `
+                            <span class="color-swatch-cert" style="background-color: ${color}"></span>${color}
+                        `).join(' ')}
+                    </span>
+                </div>
+            ` : ''}
         </div>
         
         <div class="section">
@@ -638,7 +678,7 @@
         </div>
         
         <div class="footer">
-            <p>Questo certificato è stato generato da Nova - Analisi di sostenibilità digitale</p>
+            <p><strong>Questo certificato è stato generato da Nova - Analisi di sostenibilità digitale</strong></p>
             <p>Analisi automatica basata su algoritmi di computer vision e metriche standard WCAG 2.1</p>
             <p>Questa analisi non sostituisce una valutazione scientifica o tecnica professionale.</p>
         </div>
@@ -755,9 +795,16 @@
                                         <p class="text-sm text-white/70">${(this.uploadedFile.size / 1024 / 1024).toFixed(2)} MB</p>
                                     </div>
                                 </div>
-                                <button id="new-analysis-btn" class="bg-[#96E6B3] text-[#1F3B2C] font-medium py-2 px-4 rounded-lg hover:bg-white transition-colors text-sm">
-                                    Nuova analisi
-                                </button>
+                                <div class="flex items-center gap-3">
+                                    <button id="remove-btn" class="text-white hover:text-white/70 transition-colors bg-transparent border-none" title="Rimuovi file">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6h14ZM10 11v6M14 11v6"/>
+                                        </svg>
+                                    </button>
+                                    <button id="new-analysis-btn" class="bg-[#96E6B3] text-[#1F3B2C] font-medium py-2 px-4 rounded-lg hover:bg-white transition-colors text-sm">
+                                        Nuova analisi
+                                    </button>
+                                </div>
                             </div>
                         </div>
                         
@@ -805,7 +852,7 @@
                                 ${this.renderMetric('Acqua per visualizzazione', `${environmental.h2oViewMl} ml`, 'h2o-view')}
                             </div>
                             ${environmental.colorFactor > 0 ? `
-                                <div class="mt-4 p-3 bg-white/10 rounded-lg">
+                                <div class="mt-6 p-4 bg-white/10 rounded-lg">
                                     <p class="text-sm text-white/80">
                                         ⚠️ Penalità del ${environmental.colorFactor}% per colori chiari che aumentano il consumo su schermi OLED
                                     </p>
@@ -831,13 +878,13 @@
                                 ${this.renderMetric('Leggibilità font', accessibility.fontReadability ? '<span class="icon-check">✓</span>' : '<span class="icon-cross">✗</span>', 'font-readability')}
                             </div>
                             ${accessibility.dominantColors && accessibility.dominantColors.length > 0 ? `
-                                <div class="mt-4 p-3 bg-white/10 rounded-lg">
-                                    <p class="text-sm text-white/80 mb-2">Colori dominanti analizzati:</p>
-                                    <div class="flex gap-2">
+                                <div class="mt-6 p-4 bg-white/10 rounded-lg">
+                                    <p class="text-sm text-white/80 mb-3">Colori dominanti analizzati:</p>
+                                    <div class="flex flex-wrap gap-3">
                                         ${accessibility.dominantColors.map(color => `
-                                            <div class="flex items-center gap-2">
-                                                <div class="w-4 h-4 rounded border border-white/30" style="background-color: ${color}"></div>
-                                                <span class="text-xs text-white/70">${color}</span>
+                                            <div class="flex items-center gap-2 bg-white/5 px-3 py-2 rounded-lg">
+                                                <div class="color-swatch" style="background-color: ${color}"></div>
+                                                <span class="text-xs text-white font-mono">${color}</span>
                                             </div>
                                         `).join('')}
                                     </div>
@@ -869,8 +916,8 @@
 
             renderMetric(label, value, modalId) {
                 return `
-                    <div class="bg-white/5 p-4 rounded-lg text-center">
-                        <div class="flex items-center justify-center gap-2 mb-3">
+                    <div class="bg-white/5 p-5 rounded-lg text-center metric-box">
+                        <div class="flex items-center justify-center gap-2 mb-4">
                             <p class="text-white/80 font-medium text-sm">${label}</p>
                             <button class="info-btn" data-modal="${modalId}">
                                 <span class="text-white text-sm">ⓘ</span>
@@ -1002,17 +1049,17 @@
                         <h3 class="text-2xl font-bold text-[#96E6B3] mb-6">💡 Raccomandazioni</h3>
                         <div class="space-y-4">
                             ${recommendations.map(rec => `
-                                <div class="bg-white/5 p-4 rounded-lg border-l-4 ${
+                                <div class="bg-white/5 rounded-lg border-l-4 recommendation-box ${
                                     rec.priority === 'alta' ? 'border-red-500' :
                                     rec.priority === 'media' ? 'border-yellow-500' :
                                     rec.priority === 'bassa' ? 'border-blue-500' :
                                     'border-green-500'
                                 }">
-                                    <div class="flex items-start gap-3">
+                                    <div class="flex items-start gap-4">
                                         <div class="flex-grow">
-                                            <div class="flex items-center gap-2 mb-2">
+                                            <div class="flex items-center gap-3 mb-3">
                                                 <span class="text-sm text-white/70">${rec.category}</span>
-                                                <span class="text-xs px-2 py-1 rounded-full ${
+                                                <span class="text-xs px-3 py-1 rounded-full ${
                                                     rec.priority === 'alta' ? 'bg-red-500/20 text-red-300' :
                                                     rec.priority === 'media' ? 'bg-yellow-500/20 text-yellow-300' :
                                                     rec.priority === 'bassa' ? 'bg-blue-500/20 text-blue-300' :
@@ -1021,8 +1068,8 @@
                                                     ${rec.priority === 'info' ? 'Info' : 'Priorità ' + rec.priority}
                                                 </span>
                                             </div>
-                                            <h4 class="font-semibold text-white mb-1">${rec.title}</h4>
-                                            <p class="text-white/80 text-sm">${rec.description}</p>
+                                            <h4 class="font-semibold text-white mb-2">${rec.title}</h4>
+                                            <p class="text-white/80 text-sm leading-relaxed">${rec.description}</p>
                                         </div>
                                     </div>
                                 </div>
