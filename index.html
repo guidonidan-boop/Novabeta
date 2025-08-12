@@ -976,7 +976,7 @@
                                     </p>
                                     
                                     <p class="text-lg text-white/80 leading-relaxed">
-                                        L'obiettivo del progetto è aiutare designer, sviluppatori e redattori a migliorare l'impatto ambientale e l'accessibilità dei propri contenuti online.
+                                        L'obiettivo del progetto è aiutare designer, sviluppatori e redattori a migliorare l'impatto ambientale, economico e sociale dei propri contenuti online.
                                     </p>
                                     
                                     <p class="text-lg text-white/80 leading-relaxed">
@@ -1128,9 +1128,9 @@
                             </button>
                         </div>
 
-                        <!-- Impatto ambientale -->
+                        <!-- Sostenibilità ambientale -->
                         <div class="analysis-box">
-                            <h3 class="text-2xl font-bold text-[#96E6B3] mb-6">🌱 Impatto ambientale</h3>
+                            <h3 class="text-2xl font-bold text-[#96E6B3] mb-6">🌱 Sostenibilità ambientale</h3>
                             <div class="text-center mb-6">
                                 <span class="text-4xl font-bold text-white">${environmental.score}/100</span>
                             </div>
@@ -1152,7 +1152,12 @@
 
                         <!-- Accessibilità -->
                         <div class="analysis-box">
-                            <h3 class="text-2xl font-bold text-[#96E6B3] mb-6">👁️ Accessibilità WCAG 2.1</h3>
+                            <h3 class="text-2xl font-bold text-[#96E6B3] mb-6 flex items-center gap-2">
+                                👁️ Accessibilità WCAG 2.1
+                                <button class="info-btn" data-modal="wcag-info">
+                                    <span class="text-white text-sm">ⓘ</span>
+                                </button>
+                            </h3>
                             <div class="text-center mb-6">
                                 <span class="text-4xl font-bold text-white">${accessibility.score}/100</span>
                                 <div class="mt-2">
@@ -1340,9 +1345,9 @@
                         <div class="space-y-4">
                             ${recommendations.map(rec => `
                                 <div class="bg-white/5 rounded-lg border-l-4 recommendation-box ${
-                                    rec.priority === 'alta' ? 'border-red-500' :
                                     rec.priority === 'media' ? 'border-yellow-500' :
                                     rec.priority === 'bassa' ? 'border-blue-500' :
+                                    rec.priority === 'alta' ? 'border-red-500' :
                                     'border-green-500'
                                 }">
                                     <div class="flex items-start gap-4">
@@ -1350,12 +1355,11 @@
                                             <div class="flex items-center gap-3 mb-3">
                                                 <span class="text-sm text-white/70">${rec.category}</span>
                                                 <span class="text-xs px-3 py-1 rounded-full ${
-                                                    rec.priority === 'alta' ? 'bg-red-500/20 text-red-300' :
                                                     rec.priority === 'media' ? 'bg-yellow-500/20 text-yellow-300' :
                                                     rec.priority === 'bassa' ? 'bg-blue-500/20 text-blue-300' :
                                                     'bg-green-500/20 text-green-300'
                                                 }">
-                                                    ${rec.priority === 'info' ? 'Ottimo' : rec.priority.charAt(0).toUpperCase() + rec.priority.slice(1)}
+                                                    ${rec.priority === 'info' ? 'Ottimo' : rec.priority === 'alta' ? '' : rec.priority.charAt(0).toUpperCase() + rec.priority.slice(1)}
                                                 </span>
                                             </div>
                                             <h4 class="font-semibold text-white mb-2">${rec.title}</h4>
@@ -1554,6 +1558,31 @@
                                 <li>Riutilizzo di componenti tra progetti</li>
                                 <li>Testing più efficiente e sistematico</li>
                             </ul>
+                        `
+                    },
+                    'wcag-info': {
+                        title: 'WCAG 2.1',
+                        content: `
+                            <p><strong>Cosa sono le WCAG 2.1</strong></p>
+                            <p>Le Web Content Accessibility Guidelines (WCAG) 2.1 sono le linee guida internazionali standard per l'accessibilità web, sviluppate dal W3C (World Wide Web Consortium).</p>
+                            
+                            <p class="mt-3"><strong>Livelli di conformità</strong></p>
+                            <ul class="list-disc list-inside space-y-2 mt-3">
+                                <li><strong>A:</strong> Livello minimo di accessibilità</li>
+                                <li><strong>AA:</strong> Standard raccomandato per la maggior parte dei siti web</li>
+                                <li><strong>AAA:</strong> Livello più alto, richiesto per contesti specifici</li>
+                            </ul>
+                            
+                            <p class="mt-3"><strong>Principi fondamentali</strong></p>
+                            <ul class="list-disc list-inside space-y-2 mt-3">
+                                <li><strong>Percepibile:</strong> Le informazioni devono essere presentate in modi che gli utenti possano percepire</li>
+                                <li><strong>Utilizzabile:</strong> I componenti dell'interfaccia devono essere utilizzabili da tutti</li>
+                                <li><strong>Comprensibile:</strong> Le informazioni e l'uso dell'interfaccia devono essere comprensibili</li>
+                                <li><strong>Robusto:</strong> Il contenuto deve essere accessibile a una vasta gamma di tecnologie assistive</li>
+                            </ul>
+                            
+                            <p class="mt-3"><strong>Riferimento ufficiale</strong></p>
+                            <p><a href="https://www.w3.org/WAI/WCAG21/quickref/" class="text-[#96E6B3] underline">https://www.w3.org/WAI/WCAG21/quickref/</a></p>
                         `
                     }
                 };
