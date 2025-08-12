@@ -857,7 +857,7 @@
 
         <div class="metrics">
             <div class="metric-card">
-                <div class="metric-title">🌱 Impatto Ambientale</div>
+                <div class="metric-title">🌱 Sostenibilità Ambientale</div>
                 <div class="metric-value">${environmental.score}/100</div>
             </div>
             <div class="metric-card">
@@ -872,7 +872,7 @@
         </div>
 
         <div class="environmental-details">
-            <h3>Dettagli Impatto Ambientale</h3>
+            <h3>Dettagli Sostenibilità Ambientale</h3>
             <p><strong>CO₂ per upload:</strong> ${environmental.co2UploadG}g</p>
             <p><strong>CO₂ per visualizzazione:</strong> ${environmental.co2ViewColorG}g</p>
             <p><strong>Consumo acqua upload:</strong> ${environmental.h2oUploadMl} ml</p>
@@ -1130,7 +1130,12 @@
 
                         <!-- Sostenibilità ambientale -->
                         <div class="analysis-box">
-                            <h3 class="text-2xl font-bold text-[#96E6B3] mb-6">🌱 Sostenibilità ambientale</h3>
+                            <h3 class="text-2xl font-bold text-[#96E6B3] mb-6 flex items-center gap-2">
+                                🌱 Sostenibilità ambientale
+                                <button class="info-btn" data-modal="environmental-sustainability-info">
+                                    <span class="text-white text-sm">ⓘ</span>
+                                </button>
+                            </h3>
                             <div class="text-center mb-6">
                                 <span class="text-4xl font-bold text-white">${environmental.score}/100</span>
                             </div>
@@ -1189,7 +1194,12 @@
 
                         <!-- Sostenibilità economica -->
                         <div class="analysis-box">
-                            <h3 class="text-2xl font-bold text-[#96E6B3] mb-6">💰 Sostenibilità economica</h3>
+                            <h3 class="text-2xl font-bold text-[#96E6B3] mb-6 flex items-center gap-2">
+                                💰 Sostenibilità economica
+                                <button class="info-btn" data-modal="economic-sustainability-info">
+                                    <span class="text-white text-sm">ⓘ</span>
+                                </button>
+                            </h3>
                             <div class="text-center mb-6">
                                 <span class="text-4xl font-bold text-white">${economic.score}/100</span>
                             </div>
@@ -1583,6 +1593,69 @@
                             
                             <p class="mt-3"><strong>Riferimento ufficiale</strong></p>
                             <p><a href="https://www.w3.org/WAI/WCAG21/quickref/" class="text-[#96E6B3] underline">https://www.w3.org/WAI/WCAG21/quickref/</a></p>
+                        `
+                    },
+                    'economic-sustainability-info': {
+                        title: 'Sostenibilità economica',
+                        content: `
+                            <p><strong>Cosa significa sostenibilità economica nel web design</strong></p>
+                            <p>La sostenibilità economica nel design digitale riguarda la creazione di contenuti e interfacce che siano economicamente vantaggiosi a lungo termine, riducendo i costi di sviluppo, manutenzione e gestione.</p>
+                            
+                            <p class="mt-3"><strong>Aspetti chiave</strong></p>
+                            <ul class="list-disc list-inside space-y-2 mt-3">
+                                <li><strong>Design system:</strong> Utilizzo di componenti standardizzati e riutilizzabili che riducono i tempi di sviluppo</li>
+                                <li><strong>Font open source:</strong> Scelta di tipografie gratuite per evitare costi di licenza</li>
+                                <li><strong>Layout modulari:</strong> Strutture semplici e scalabili che facilitano manutenzione e aggiornamenti</li>
+                                <li><strong>Codice efficiente:</strong> Sviluppo ottimizzato che riduce i costi di hosting e banda</li>
+                            </ul>
+                            
+                            <p class="mt-3"><strong>Benefici economici</strong></p>
+                            <ul class="list-disc list-inside space-y-2 mt-3">
+                                <li>Riduzione dei costi di sviluppo iniziale</li>
+                                <li>Manutenzione semplificata e meno costosa</li>
+                                <li>Scalabilità economica del progetto</li>
+                                <li>Riutilizzo di asset tra diversi progetti</li>
+                                <li>Minori costi operativi a lungo termine</li>
+                            </ul>
+                            
+                            <p class="mt-3"><strong>Impatto sociale</strong></p>
+                            <p>Una migliore sostenibilità economica consente di allocare più risorse verso innovazione, accessibilità e miglioramenti dell'esperienza utente, creando valore condiviso per aziende e utilizzatori.</p>
+                        `
+                    },
+                    'environmental-sustainability-info': {
+                        title: 'Sostenibilità ambientale',
+                        content: `
+                            <p><strong>Cosa significa sostenibilità ambientale nel web design</strong></p>
+                            <p>La sostenibilità ambientale nel design digitale riguarda la creazione di contenuti e interfacce che minimizzano l'impatto ecologico attraverso scelte consapevoli di design, sviluppo e distribuzione.</p>
+                            
+                            <p class="mt-3"><strong>Impatto ambientale del digitale</strong></p>
+                            <ul class="list-disc list-inside space-y-2 mt-3">
+                                <li><strong>Emissioni CO₂:</strong> Ogni contenuto digitale genera emissioni durante upload, trasferimento e visualizzazione</li>
+                                <li><strong>Consumo energetico:</strong> Data center, reti e dispositivi richiedono energia elettrica costante</li>
+                                <li><strong>Consumo idrico:</strong> I data center utilizzano acqua per il raffreddamento dei server</li>
+                                <li><strong>Risorse hardware:</strong> Dispositivi più efficienti riducono la necessità di upgrade frequenti</li>
+                            </ul>
+                            
+                            <p class="mt-3"><strong>Perché è importante un design sostenibile</strong></p>
+                            <ul class="list-disc list-inside space-y-2 mt-3">
+                                <li><strong>Responsabilità ambientale:</strong> Il settore ICT rappresenta il 4% delle emissioni globali di CO₂</li>
+                                <li><strong>Crescita esponenziale:</strong> Il traffico digitale raddoppia ogni 3-4 anni</li>
+                                <li><strong>Efficienza energetica:</strong> Contenuti ottimizzati riducono il consumo di banda e energia</li>
+                                <li><strong>Esperienza utente:</strong> Siti più leggeri sono più veloci e accessibili</li>
+                                <li><strong>Costi operativi:</strong> Minore consumo di risorse significa costi infrastrutturali ridotti</li>
+                            </ul>
+                            
+                            <p class="mt-3"><strong>Principi di design sostenibile</strong></p>
+                            <ul class="list-disc list-inside space-y-2 mt-3">
+                                <li>Ottimizzazione delle immagini e dei contenuti multimediali</li>
+                                <li>Scelta di colori che riducono il consumo energetico degli schermi</li>
+                                <li>Codice efficiente e caricamento ottimizzato</li>
+                                <li>Design minimale che privilegia la funzionalità</li>
+                                <li>Hosting green con energie rinnovabili</li>
+                            </ul>
+                            
+                            <p class="mt-3"><strong>Riferimenti scientifici</strong></p>
+                            <p><a href="https://sustainablewebdesign.org/" class="text-[#96E6B3] underline">Sustainable Web Design Model</a> - Standard internazionale per la misurazione dell'impatto ambientale digitale</p>
                         `
                     }
                 };
