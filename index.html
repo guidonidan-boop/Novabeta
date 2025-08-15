@@ -152,6 +152,15 @@
             outline: none;
             box-shadow: none;
         }
+
+        /* Assicura che il pulsante di chiusura del modal non abbia sfondo né bordo */
+        .modal-close {
+            background: none !important;
+            border: none !important;
+            padding: 0;
+            margin: 0;
+            color: #ffffff;
+        }
     </style>
 </head>
 <body class="min-h-screen bg-[#1F3B2C] text-white">
@@ -486,8 +495,9 @@
                     };
 
                 } catch (error) {
-                    console.error('Errore durante l\'analisi:', error);
-                    this.error = 'Errore durante l\'analisi del file. Riprova.';
+                    // Use double-quoted strings to avoid prematurely ending the string due to apostrophes
+                    console.error("Errore durante l'analisi:", error);
+                    this.error = "Errore durante l'analisi del file. Riprova.";
                 } finally {
                     this.isAnalyzing = false;
                     this.render();
@@ -495,46 +505,87 @@
             }
 
             calculateEnvironmentalImpact(sizeInMB) {
-                // CALCOLI CORRETTI basati su Sustainable Web Design Model 2024
-                // Fonte: https://sustainablewebdesign.org/estimating-digital-emissions/
-                
-                // Emissioni totali per MB (g CO₂): 0.028g/MB per ciclo completo
-                const totalCO2PerMB = 0.028;
-                
-                // Suddivisione per fase del ciclo di vita:
-                // Upload/trasferimento: ~43% del totale (0.012g/MB)
-                // Visualizzazione/utilizzo: ~57% del totale (0.016g/MB)
-                const co2UploadG = Math.round(sizeInMB * 0.012 * 1000) / 1000;
-                const baseCO2ViewG = Math.round(sizeInMB * 0.016 * 1000) / 1000;
-                
-                // Fattore colore per schermi OLED (correzione scientifica)
-                // Penetrazione OLED: ~30% smartphone, <5% laptop/desktop
-                // Risparmio energetico dark mode: max 3-9% (Purdue University 2021)
+                /*
+                 * Calcolo dell'impatto ambientale basato sul Sustainable Web Design Model (SWDM).
+                 * Il modello divide i consumi energetici tra data center, rete e dispositivi utente e
+                 * utilizza l'intensità carbonica della rete per convertire i kWh in grammi di CO₂e.
+                 * Fonte: Sustainable Web Design Model 2024【363710125564870†L63-L75】【552450473791055†L213-L246】.
+                 */
+                // Converti la dimensione in MB in GB per l'uso delle intensità energetiche per GB
+                const sizeInGB = sizeInMB / 1024;
+
+                // Intensità energetiche operative (kWh/GB) per i tre segmenti
+                // Data center: 0.055 kWh/GB, rete: 0.059 kWh/GB, dispositivi utente: 0.080 kWh/GB【552450473791055†L213-L246】
+                const energyIntensity = {
+                    dataCenter: 0.055,
+                    network: 0.059,
+                    userDevice: 0.080
+                };
+                // Intensità energetiche embody (non utilizzate qui ma disponibili per future estensioni)
+                // const embodiedIntensity = { dataCenter: 0.012, network: 0.013, userDevice: 0.081 };
+
+                // Converti da kWh/GB a kWh/MB per comodità
+                const energyPerMB = {
+                    dataCenter: energyIntensity.dataCenter / 1024,
+                    network: energyIntensity.network / 1024,
+                    userDevice: energyIntensity.userDevice / 1024
+                };
+
+                // Intensità carbonica (g CO₂e/kWh). Per un calcolo più accurato è possibile sostituire
+                // questo valore con l'intensità locale della rete elettrica【552450473791055†L118-L131】.
+                const CARBON_INTENSITY_G_PER_KWH = 494;
+
+                // Water Usage Effectiveness (WUE) in litri per kWh. L'articolo di TechTarget riporta
+                // un valore medio di 1,8 L/kWh per i data center【8268087492799†L193-L204】. Utilizziamo
+                // questo dato come riferimento; un valore inferiore (ad es. 0,15 L/kWh) può essere
+                // impostato per data center particolarmente efficienti.
+                const WUE_L_PER_KWH = 1.8;
+
+                // Calcolo CO₂e per upload: si considera l'energia del data center per salvare
+                // il contenuto e l'energia della rete per il trasferimento. Nessuna energia del
+                // dispositivo utente viene consumata durante l'upload.
+                const co2Upload = sizeInMB * (energyPerMB.dataCenter + energyPerMB.network) * CARBON_INTENSITY_G_PER_KWH;
+
+                // Calcolo CO₂e per visualizzazione: include data center, rete e dispositivo utente.
+                const baseCo2View = sizeInMB * (energyPerMB.dataCenter + energyPerMB.network + energyPerMB.userDevice) * CARBON_INTENSITY_G_PER_KWH;
+
+                // Fattore colore per schermi OLED: penalizza contenuti con luminosità molto alta
+                // sui dispositivi OLED, aumentando il consumo energetico del dispositivo utente.
                 let colorFactor = 0;
-                let co2ViewColorG = baseCO2ViewG;
-                
-                const oledPenetration = 0.25; // 25% dei dispositivi mediamente
+                let co2ViewColor = baseCo2View;
+                const oledPenetration = 0.25; // ~25% dei dispositivi utilizzano schermi OLED
                 if (this.colorAnalysisData && this.colorAnalysisData.averageBrightness > 0.8) {
-                    // Solo per colori molto chiari (>80% brightness)
-                    const brightnessPenalty = (this.colorAnalysisData.averageBrightness - 0.8) * 15; // Max 3%
-                    colorFactor = Math.round(brightnessPenalty * oledPenetration * 10) / 10; // Max ~1%
-                    co2ViewColorG = Math.round(baseCO2ViewG * (1 + colorFactor/100) * 1000) / 1000;
+                    // Solo per luminosità media > 80%. Penalità fino a ~3% per colori molto chiari
+                    const brightnessPenalty = (this.colorAnalysisData.averageBrightness - 0.8) * 15;
+                    // Applica la penalità ridotta dalla penetrazione degli OLED
+                    colorFactor = Math.round(brightnessPenalty * oledPenetration * 10) / 10;
+                    // Aumenta il consumo solo della quota di visualizzazione. Il fattore agisce su tutto
+                    // il consumo di visualizzazione per semplicità, come nel modello precedente.
+                    co2ViewColor = baseCo2View * (1 + colorFactor / 100);
                 }
-                
-                // Calcolo consumo acqua basato su Water Usage Effectiveness (WUE)
-                // Calcolo diretto: 1-205 ml/MB (media 103 ml/MB)
-                const avgWaterUsageMlPerMB = 103; // Media tra 1 e 205 ml/MB
-                const h2oUploadMl = Math.round(sizeInMB * avgWaterUsageMlPerMB * 0.43 * 10) / 10; // 43% per upload
-                const h2oViewMl = Math.round(sizeInMB * avgWaterUsageMlPerMB * 0.57 * (1 + colorFactor/100) * 10) / 10; // 57% per view
-                
-                // Punteggio ambientale basato su benchmarks reali
+
+                // Calcola il consumo di acqua (ml) basato su WUE. Solo l'energia del data center
+                // contribuisce direttamente al consumo idrico, poiché la WUE misura l'acqua per
+                // raffreddare i server【8268087492799†L193-L204】.
+                const h2oUpload = sizeInMB * energyPerMB.dataCenter * WUE_L_PER_KWH * 1000; // ml
+                let h2oView = sizeInMB * energyPerMB.dataCenter * WUE_L_PER_KWH * 1000;
+                // Se è applicato il fattore colore, aumentiamo proporzionalmente anche il consumo d'acqua
+                if (colorFactor > 0) {
+                    h2oView = h2oView * (1 + colorFactor / 100);
+                }
+
+                // Approssima e arrotonda i valori per la presentazione
+                const co2UploadG = Math.round(co2Upload * 1000) / 1000;
+                const co2ViewColorG = Math.round(co2ViewColor * 1000) / 1000;
+                const h2oUploadMl = Math.round(h2oUpload * 10) / 10;
+                const h2oViewMl = Math.round(h2oView * 10) / 10;
+
+                // Calcola punteggio ambientale basato su soglie dimensionali e penalità colori.
                 let score = 100;
-                if (sizeInMB > 5) score -= 30;      // File molto pesanti
-                else if (sizeInMB > 2) score -= 15; // File pesanti
-                else if (sizeInMB > 1) score -= 5;  // File medi
-                
-                if (colorFactor > 0.5) score -= Math.round(colorFactor); // Penalità colori
-                
+                if (sizeInMB > 5) score -= 30;
+                else if (sizeInMB > 2) score -= 15;
+                else if (sizeInMB > 1) score -= 5;
+                if (colorFactor > 0.5) score -= Math.round(colorFactor);
                 score = Math.max(0, Math.min(100, score));
 
                 return {
@@ -628,25 +679,59 @@
             }
 
             analyzeEconomicSustainability() {
-                // Analisi deterministica basata su caratteristiche oggettive del file
+                // Analisi basata su caratteristiche oggettive del file
+                // Usiamo un semplice hash per simulare la presenza di un design system.
                 const fileHash = this.simpleFileHash(this.uploadedFile.name + this.uploadedFile.size);
-                
+
                 // Design system: valutazione basata su dimensione e complessità
-                const usesDesignSystem = (fileHash % 10) > 3; // 60% probabilità
-                
-                // Font open source: approccio conservativo
-                // Assumiamo sempre font proprietari per immagini standalone, 
-                // poiché non possiamo identificare con certezza assoluta i font utilizzati
-                const usesOpenSourceFonts = false;
-                
-                // Layout semplice: basato su dimensione del file
-                const hasSimpleLayout = this.uploadedFile.size < 2 * 1024 * 1024; // File < 2MB = layout semplice
-                
-                let score = 50; // Base score
+                // Se l'hash produce un numero elevato, presumiamo l'utilizzo di un design system.
+                const usesDesignSystem = (fileHash % 10) > 3; // ~60% di probabilità
+
+                /*
+                 * Font open source:
+                 * Per i PDF, effettuiamo una scansione del contenuto (in base64) alla ricerca di
+                 * nomi di alcuni tra i più diffusi font open source (es. Roboto, Open Sans,
+                 * Lato, Montserrat, Poppins, Source Sans Pro, Inter, Raleway, Nunito,
+                 * Merriweather). Se almeno un font viene individuato, assegnamo un punteggio
+                 * positivo alla sostenibilità economica. Per le immagini non è possibile
+                 * determinare il font dal file stesso, quindi assumiamo l'uso di font proprietari.
+                 */
+                let usesOpenSourceFonts = false;
+                if (this.uploadedFile.type === 'application/pdf') {
+                    try {
+                        // Estrai la parte base64 dell'URL (dopo la virgola)
+                        const base64 = this.uploadedFile.url.split(',')[1] || '';
+                        // Decodifica solo i primi ~50 kB per evitare costi elevati
+                        const sample = base64.slice(0, 50000);
+                        const decoded = atob(sample);
+                        const lowerDecoded = decoded.toLowerCase();
+                        const openFonts = [
+                            'roboto',
+                            'open sans',
+                            'lato',
+                            'montserrat',
+                            'poppins',
+                            'source sans pro',
+                            'inter',
+                            'raleway',
+                            'nunito',
+                            'merriweather'
+                        ];
+                        usesOpenSourceFonts = openFonts.some(fontName => lowerDecoded.includes(fontName));
+                    } catch (err) {
+                        // In caso di errore nella decodifica, mantieni l'ipotesi conservativa
+                        usesOpenSourceFonts = false;
+                    }
+                }
+
+                // Layout semplice: un file più piccolo suggerisce un layout più essenziale
+                const hasSimpleLayout = this.uploadedFile.size < 2 * 1024 * 1024; // <2 MB
+
+                // Calcolo punteggio: partiamo da 50 e aggiungiamo bonus
+                let score = 50;
                 if (usesDesignSystem) score += 25;
                 if (usesOpenSourceFonts) score += 15;
                 if (hasSimpleLayout) score += 10;
-                
                 score = Math.max(0, Math.min(100, score));
 
                 return {
@@ -1057,7 +1142,7 @@
                                         <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6h14ZM10 11v6M14 11v6"/>
                                     </svg>
                                 </button>
-                                <button id="analyze-btn" class="bg-[#96E6B3] text-[#1F3B2C] font-semibold py-3 px-16 rounded-lg hover:bg-white transition-colors">
+                                <button id="analyze-btn" class="bg-[#96E6B3] text-[#1F3B2C] font-semibold py-4 px-14 sm:px-24 rounded-lg hover:bg-white transition-colors">
                                     Analizza
                                 </button>
                             </div>
@@ -1251,17 +1336,32 @@
                             <div class="bg-white/5 p-6 rounded-lg">
                                 <div class="text-3xl mb-3">🚗</div>
                                 <div class="text-2xl font-bold text-white mb-1">${kmInCar} km</div>
-                                <div class="text-white/70">in auto</div>
+                                <div class="text-white/70 flex items-center justify-center gap-2">
+                                    <span>in auto</span>
+                                    <button class="info-btn" data-modal="impact-car">
+                                        <span class="text-white text-xs">ⓘ</span>
+                                    </button>
+                                </div>
                             </div>
                             <div class="bg-white/5 p-6 rounded-lg">
                                 <div class="text-3xl mb-3">☕</div>
                                 <div class="text-2xl font-bold text-white mb-1">${coffees}</div>
-                                <div class="text-white/70">caffè</div>
+                                <div class="text-white/70 flex items-center justify-center gap-2">
+                                    <span>caffè</span>
+                                    <button class="info-btn" data-modal="impact-coffee">
+                                        <span class="text-white text-xs">ⓘ</span>
+                                    </button>
+                                </div>
                             </div>
                             <div class="bg-white/5 p-6 rounded-lg">
                                 <div class="text-3xl mb-3">📱</div>
                                 <div class="text-2xl font-bold text-white mb-1">${phoneCharges}</div>
-                                <div class="text-white/70">ricariche smartphone</div>
+                                <div class="text-white/70 flex items-center justify-center gap-2">
+                                    <span>ricariche smartphone</span>
+                                    <button class="info-btn" data-modal="impact-phone">
+                                        <span class="text-white text-xs">ⓘ</span>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1278,7 +1378,8 @@
                         recommendations.push({
                             category: '🌱 Ambiente',
                             title: 'Riduci la dimensione del file',
-                            description: 'Comprimi l\'immagine o usa formati più efficienti come WebP per ridurre l\'impatto ambientale.',
+                            // Use double quotes to correctly handle apostrophes within the Italian text
+                            description: "Comprimi l'immagine o usa formati più efficienti come WebP per ridurre l'impatto ambientale.",
                             priority: 'alta'
                         });
                     }
@@ -1286,7 +1387,8 @@
                         recommendations.push({
                             category: '🌱 Ambiente',
                             title: 'Ottimizza i colori per OLED',
-                            description: 'Riduci l\'uso di colori molto chiari che aumentano il consumo energetico sui dispositivi OLED (~25% del parco dispositivi).',
+                            // Use double quotes to correctly handle apostrophes within the Italian text
+                            description: "Riduci l'uso di colori molto chiari che aumentano il consumo energetico sui dispositivi OLED (~25% del parco dispositivi).",
                             priority: 'media'
                         });
                     }
@@ -1306,7 +1408,8 @@
                         recommendations.push({
                             category: '👁️ Accessibilità',
                             title: 'Aggiungi testo alternativo',
-                            description: 'Inserisci una descrizione dell\'immagine per utenti con disabilità visive e screen reader.',
+                            // Use double quotes to correctly handle apostrophes within the Italian text
+                            description: "Inserisci una descrizione dell'immagine per utenti con disabilità visive e screen reader.",
                             priority: 'alta'
                         });
                     }
@@ -1326,7 +1429,7 @@
                         recommendations.push({
                             category: '💰 Economia',
                             title: 'Usa un design system',
-                            description: 'Adopta componenti standardizzati per ridurre i costi di sviluppo e manutenzione.',
+                            description: 'Adotta componenti standardizzati per ridurre i costi di sviluppo e manutenzione.',
                             priority: 'media'
                         });
                     }
@@ -1435,50 +1538,62 @@
                         title: 'CO₂ per upload',
                         content: `
                             <p><strong>Cosa significa</strong></p>
-                            <p>Caricare un contenuto digitale consuma energia nei server, nella rete e nei dispositivi. Secondo il Sustainable Web Design Model 2024, stimiamo <strong>0.012 grammi di CO₂ per MB trasferito</strong>.</p>
+                            <p>Quando carichi un file su un server, vengono consumate energia elettrica per memorizzare e trasmettere i dati attraverso la rete. Il Sustainable Web Design Model suddivide questa energia in tre segmenti: data center, rete e dispositivi utente, ma per l'upload consideriamo solo data center e rete.</p>
                             
                             <p class="mt-3"><strong>Calcolo</strong></p>
-                            <p>Il valore rappresenta il 43% dell'impatto totale del ciclo di vita digitale (0.028g CO₂/MB totali), mentre il 57% è attribuito alla visualizzazione del contenuto.</p>
+                            <p>L'energia stimata per trasferire 1 GB è di <strong>0.055 kWh</strong> per i data center e <strong>0.059 kWh</strong> per la rete. Per ogni MB caricato, la nostra applicazione moltiplica queste intensità energetiche per la dimensione del file e per l'intensità carbonica della rete elettrica (≈ 494 g CO₂e/kWh), ottenendo così le emissioni in grammi di CO₂e.</p>
                             
-                            <p class="mt-3"><strong>Fonte</strong></p>
-                            <p>Sustainable Web Design – Estimating Digital Emissions<br>
-                            <a href="https://sustainablewebdesign.org/estimating-digital-emissions/" class="text-[#96E6B3] underline">https://sustainablewebdesign.org/estimating-digital-emissions/</a></p>
+                            <p class="mt-3"><strong>Fonti</strong></p>
+                            <p>
+                                <a href="https://sustainablewebdesign.org/estimating-digital-emissions/" class="text-[#96E6B3] underline" target="_blank">Sustainable Web Design – Estimating Digital Emissions</a>
+                            </p>
                         `
                     },
                     'co2-view': {
                         title: 'CO₂ per visualizzazione',
                         content: `
                             <p><strong>Cosa significa</strong></p>
-                            <p>Visualizzare un contenuto digitale consuma energia per alimentare lo schermo, la rete e i server. Secondo il Sustainable Web Design Model 2024, stimiamo <strong>0.016 grammi di CO₂ per MB visualizzato</strong>.</p>
+                            <p>Ogni volta che un utente visualizza un contenuto, si consumano energia nei server (data center), nella rete che consegna i dati e nel dispositivo dell’utente che li elabora. Il Sustainable Web Design Model fornisce intensità energetiche per ciascun segmento.</p>
                             
                             <p class="mt-3"><strong>Calcolo</strong></p>
-                            <p>Il valore rappresenta il 57% dell'impatto totale del ciclo di vita digitale, mentre il 43% è attribuito al trasferimento/upload del contenuto.</p>
+                            <p>Sommiamo le intensità energetiche operative per data center (<strong>0.055 kWh/GB</strong>), rete (<strong>0.059 kWh/GB</strong>) e dispositivo utente (<strong>0.080 kWh/GB</strong>). La somma moltiplicata per l’intensità carbonica della rete (≈ 494 g CO₂e/kWh) e per la dimensione del file restituisce la CO₂e per visualizzazione. Se l’immagine è molto luminosa e viene visualizzata su schermi OLED, applichiamo una leggera penalità (fino a ~1 %) perché gli OLED consumano più energia per i colori chiari.</p>
                             
-                            <p class="mt-3"><strong>Fonte</strong></p>
-                            <p>Sustainable Web Design – Estimating Digital Emissions<br>
-                            <a href="https://sustainablewebdesign.org/estimating-digital-emissions/" class="text-[#96E6B3] underline">https://sustainablewebdesign.org/estimating-digital-emissions/</a></p>
+                            <p class="mt-3"><strong>Fonti</strong></p>
+                            <p>
+                                <a href="https://sustainablewebdesign.org/estimating-digital-emissions/" class="text-[#96E6B3] underline" target="_blank">Sustainable Web Design – Estimating Digital Emissions</a>
+                            </p>
                         `
                     },
                     'h2o-upload': {
                         title: 'Acqua per upload',
                         content: `
                             <p><strong>Cosa significa</strong></p>
-                            <p>I data center usano acqua per raffreddare i server. A seconda della tecnologia e del paese, ogni MB trasferito può usare da <strong>1 a 205 millilitri d'acqua</strong>.</p>
+                            <p>I data center utilizzano acqua per raffreddare i server che ospitano e trasferiscono i file. Il consumo idrico è quindi legato all'energia consumata dai data center durante il caricamento.</p>
+                            
+                            <p class="mt-3"><strong>Calcolo</strong></p>
+                            <p>Per stimare l'acqua utilizzata, moltiplichiamo l'energia consumata dal data center per caricare il file (0.055 kWh/GB) per il Water Usage Effectiveness (WUE), un indice che esprime i litri d'acqua utilizzati per kWh di energia. Un valore tipico di riferimento è <strong>1,8 L/kWh</strong>. Convertiamo quindi in millilitri e moltiplichiamo per la dimensione del file.</p>
                             
                             <p class="mt-3"><strong>Fonti</strong></p>
-                            <p>– MDPI: <a href="https://www.mdpi.com/2071-1050/7/8/11260" class="text-[#96E6B3] underline">https://www.mdpi.com/2071-1050/7/8/11260</a><br>
-                            – ResearchGate: <a href="https://www.researchgate.net/publication/281719759" class="text-[#96E6B3] underline">https://www.researchgate.net/publication/281719759</a><br>
-                            – WaterCalculator.org: <a href="https://watercalculator.org/footprint/data-centers-water-use/" class="text-[#96E6B3] underline">https://watercalculator.org/footprint/data-centers-water-use/</a></p>
+                            <p>
+                                <a href="https://www.techtarget.com/searchdatacenter/definition/water-usage-effectiveness-WUE" class="text-[#96E6B3] underline" target="_blank">TechTarget – Water Usage Effectiveness</a><br>
+                                <a href="https://sustainablewebdesign.org/estimating-digital-emissions/" class="text-[#96E6B3] underline" target="_blank">Sustainable Web Design – Estimating Digital Emissions</a>
+                            </p>
                         `
                     },
                     'h2o-view': {
                         title: 'Acqua per visualizzazione',
                         content: `
                             <p><strong>Cosa significa</strong></p>
-                            <p>Ogni visualizzazione richiede energia aggiuntiva per alimentare dispositivi e reti, correlata al consumo idrico per raffreddamento dell'infrastruttura.</p>
+                            <p>Quando un utente visualizza un contenuto, il data center consuma energia per fornire i dati. L'acqua consumata dipende dall'energia necessaria per i server e dai sistemi di raffreddamento.</p>
                             
                             <p class="mt-3"><strong>Calcolo</strong></p>
-                            <p>Il valore è calcolato come frazione del consumo per upload, modificato dal fattore colori OLED quando applicabile.</p>
+                            <p>La nostra stima moltiplica l'energia del data center per servire il file (0.055 kWh/GB) per il WUE medio (≈1,8 L/kWh). Se l'immagine è molto luminosa e visualizzata su dispositivi OLED, viene applicato lo stesso fattore di penalità utilizzato per la CO₂ per visualizzazione.</p>
+                            
+                            <p class="mt-3"><strong>Fonti</strong></p>
+                            <p>
+                                <a href="https://www.techtarget.com/searchdatacenter/definition/water-usage-effectiveness-WUE" class="text-[#96E6B3] underline" target="_blank">TechTarget – Water Usage Effectiveness</a><br>
+                                <a href="https://sustainablewebdesign.org/estimating-digital-emissions/" class="text-[#96E6B3] underline" target="_blank">Sustainable Web Design – Estimating Digital Emissions</a>
+                            </p>
                         `
                     },
                     'contrast': {
@@ -1530,6 +1645,31 @@
                             </ul>
                         `
                     },
+                    // Nuovi modali per la conversione dell'impatto
+                    'impact-car': {
+                        title: 'Equivalenza CO₂: km in auto',
+                        content: `
+                            <p>Per confrontare l'impatto di un contenuto digitale con l'uso di un'auto, calcoliamo quanta CO₂ viene emessa in totale per 1000 visualizzazioni e la dividiamo per un fattore medio di emissione di un'auto a benzina.</p>
+                            <p class="mt-3">Assumiamo un'emissione media di circa <strong>130 g di CO₂ per km</strong> percorso, valore indicativo per le auto europee nel 2024. Ad esempio, se 1000 visualizzazioni generano 1.040 g di CO₂e, l'equivalenza sarà 1.040 g ÷ 130 g/km ≈ 8 km.</p>
+                            <p class="mt-3">Questa equivalenza serve a rendere più comprensibile l'impatto digitale, ma non tiene conto di variabili come lo stile di guida, il tipo di carburante o l'efficienza specifica dei veicoli.</p>
+                        `
+                    },
+                    'impact-coffee': {
+                        title: 'Equivalenza CO₂: tazze di caffè',
+                        content: `
+                            <p>Una tazzina di espresso comporta un'impronta di circa <strong>50 g di CO₂e</strong>, considerando coltivazione, trasporto, torrefazione e preparazione.</p>
+                            <p class="mt-3">Per ottenere l'equivalenza, dividiamo la CO₂ totale per 1000 visualizzazioni per 50 g. Ad esempio, se l'impatto è 1.040 g, otteniamo circa 21 tazze di caffè.</p>
+                            <p class="mt-3">Questa stima può variare in base al tipo di caffè, alla provenienza e al metodo di estrazione.</p>
+                        `
+                    },
+                    'impact-phone': {
+                        title: 'Equivalenza CO₂: ricariche smartphone',
+                        content: `
+                            <p>La ricarica completa di uno smartphone moderno richiede circa 10 Wh di energia elettrica. Con un'intensità media di 494 g CO₂e/kWh, una ricarica equivale a circa <strong>8,3 g di CO₂e</strong>.</p>
+                            <p class="mt-3">Per convertire l'impatto di 1000 visualizzazioni in ricariche, dividiamo la CO₂ totale (in grammi) per 8,3 g. Ad esempio, 1.040 g ÷ 8,3 g ≈ 125 ricariche.</p>
+                            <p class="mt-3">Il consumo effettivo varia in base alla capacità della batteria, al caricatore usato e all'intensità carbonica della rete elettrica.</p>
+                        `
+                    },
                     'design-system': {
                         title: 'Design system',
                         content: `
@@ -1546,15 +1686,15 @@
                     'open-fonts': {
                         title: 'Font open source',
                         content: `
-                            <p>I font open source eliminano i costi di licenza:</p>
+                            <p>I font open source eliminano i costi di licenza e offrono numerosi vantaggi:</p>
                             <ul class="list-disc list-inside space-y-2 mt-3">
-                                <li>Google Fonts: gratuiti e ottimizzati per il web</li>
-                                <li>Nessun costo di licenza commerciale</li>
-                                <li>Ampia scelta di stili e varianti</li>
-                                <li>Supporto per più lingue e caratteri speciali</li>
-                                <li>Caricamento ottimizzato via CDN globali</li>
+                                <li>Google Fonts è gratuito e ottimizzato per il web;</li>
+                                <li>non richiedono costi di licenza commerciale;</li>
+                                <li>mettono a disposizione un'ampia scelta di stili e varianti;</li>
+                                <li>supportano più lingue e caratteri speciali;</li>
+                                <li>sono caricati in modo efficiente tramite CDN globali.</li>
                             </ul>
-                            <p class="mt-3"><strong>Nota:</strong> Per mantenere l'affidabilità dell'analisi, assumiamo conservativamente che le immagini standalone utilizzino font proprietari, poiché non è possibile identificare con certezza assoluta i font da un file immagine.</p>
+                            <p class="mt-3"><strong>Nota:</strong> Nova analizza i documenti PDF alla ricerca di nomi di font open source diffusi (ad esempio Roboto, Open&nbsp;Sans, Lato, Montserrat, Poppins). Se vengono individuati, viene assegnato un punteggio positivo alla sostenibilità economica. Per le immagini non è possibile identificare i font, quindi l'algoritmo presume l'uso di caratteri proprietari.</p>
                         `
                     },
                     'modular-layout': {
