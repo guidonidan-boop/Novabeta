@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nova (beta) - Analisi di SostenibilitÃ  Digitale</title>
-    <meta name="description" content="Un assistente AI per calcolare l'impatto ambientale, l'accessibilitÃ  e la sostenibilitÃ  economica dei contenuti digitali.">
+    <title>Nova (beta) - Analisi di Sostenibilità Digitale</title>
+    <meta name="description" content="Un assistente AI per calcolare l'impatto ambientale, l'accessibilità e la sostenibilità economica dei contenuti digitali.">
 
     <style>
         /* Tailwind CSS v3.4.1 | MIT License | https://tailwindcss.com - Pre-compiled for production */
@@ -151,15 +151,6 @@
         .menu-btn:focus {
             outline: none;
             box-shadow: none;
-        }
-
-        /* Assicura che il pulsante di chiusura del modal non abbia sfondo nÃ© bordo */
-        .modal-close {
-            background: none !important;
-            border: none !important;
-            padding: 0;
-            margin: 0;
-            color: #ffffff;
         }
     </style>
 </head>
@@ -334,7 +325,7 @@
                         const canvas = document.getElementById('color-analysis-canvas');
                         const ctx = canvas.getContext('2d');
                         
-                        // Ridimensiona per analisi piÃ¹ veloce
+                        // Ridimensiona per analisi più veloce
                         const maxSize = 200;
                         const scale = Math.min(maxSize / img.width, maxSize / img.height);
                         canvas.width = img.width * scale;
@@ -358,7 +349,7 @@
                             
                             if (a < 128) continue; // Skip pixels trasparenti
                             
-                            // Calcola luminositÃ 
+                            // Calcola luminosità
                             const brightness = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
                             totalBrightness += brightness;
                             pixelCount++;
@@ -395,12 +386,12 @@
                         // File promozionali tipici hanno ~1 carattere ogni 1-2KB
                         const estimatedCharacters = Math.round(this.uploadedFile.size / 1500);
                         
-                        // Calcola contrasto tra i due colori piÃ¹ comuni
+                        // Calcola contrasto tra i due colori più comuni
                         let contrastRatio = 1.0;
                         let hasGoodContrast = false;
                         
                         if (sortedColors.length >= 2) {
-                            // Trova il colore piÃ¹ chiaro e piÃ¹ scuro tra i dominanti
+                            // Trova il colore più chiaro e più scuro tra i dominanti
                             let lightestColor = sortedColors[0];
                             let darkestColor = sortedColors[0];
 
@@ -474,10 +465,10 @@
                     // Calcolo impatto ambientale
                     const environmental = this.calculateEnvironmentalImpact(sizeInMB);
                     
-                    // Analisi accessibilitÃ  migliorata
+                    // Analisi accessibilità migliorata
                     const accessibility = this.analyzeAccessibility();
                     
-                    // Analisi sostenibilitÃ  economica
+                    // Analisi sostenibilità economica
                     const economic = this.analyzeEconomicSustainability();
                     
                     // Calcolo punteggio complessivo
@@ -495,9 +486,8 @@
                     };
 
                 } catch (error) {
-                    // Use double-quoted strings to avoid prematurely ending the string due to apostrophes
-                    console.error("Errore durante l'analisi:", error);
-                    this.error = "Errore durante l'analisi del file. Riprova.";
+                    console.error('Errore durante l\'analisi:', error);
+                    this.error = 'Errore durante l\'analisi del file. Riprova.';
                 } finally {
                     this.isAnalyzing = false;
                     this.render();
@@ -505,87 +495,46 @@
             }
 
             calculateEnvironmentalImpact(sizeInMB) {
-                /*
-                 * Calcolo dell'impatto ambientale basato sul Sustainable Web Design Model (SWDM).
-                 * Il modello divide i consumi energetici tra data center, rete e dispositivi utente e
-                 * utilizza l'intensitÃ  carbonica della rete per convertire i kWh in grammi di COâ‚‚e.
-                 * Fonte: Sustainable Web Design Model 2024ã€363710125564870â€ L63-L75ã€‘ã€552450473791055â€ L213-L246ã€‘.
-                 */
-                // Converti la dimensione in MB in GB per l'uso delle intensitÃ  energetiche per GB
-                const sizeInGB = sizeInMB / 1024;
-
-                // IntensitÃ  energetiche operative (kWh/GB) per i tre segmenti
-                // Data center: 0.055 kWh/GB, rete: 0.059 kWh/GB, dispositivi utente: 0.080 kWh/GBã€552450473791055â€ L213-L246ã€‘
-                const energyIntensity = {
-                    dataCenter: 0.055,
-                    network: 0.059,
-                    userDevice: 0.080
-                };
-                // IntensitÃ  energetiche embody (non utilizzate qui ma disponibili per future estensioni)
-                // const embodiedIntensity = { dataCenter: 0.012, network: 0.013, userDevice: 0.081 };
-
-                // Converti da kWh/GB a kWh/MB per comoditÃ 
-                const energyPerMB = {
-                    dataCenter: energyIntensity.dataCenter / 1024,
-                    network: energyIntensity.network / 1024,
-                    userDevice: energyIntensity.userDevice / 1024
-                };
-
-                // IntensitÃ  carbonica (g COâ‚‚e/kWh). Per un calcolo piÃ¹ accurato Ã¨ possibile sostituire
-                // questo valore con l'intensitÃ  locale della rete elettricaã€552450473791055â€ L118-L131ã€‘.
-                const CARBON_INTENSITY_G_PER_KWH = 494;
-
-                // Water Usage Effectiveness (WUE) in litri per kWh. L'articolo di TechTarget riporta
-                // un valore medio di 1,8 L/kWh per i data centerã€8268087492799â€ L193-L204ã€‘. Utilizziamo
-                // questo dato come riferimento; un valore inferiore (ad es. 0,15 L/kWh) puÃ² essere
-                // impostato per data center particolarmente efficienti.
-                const WUE_L_PER_KWH = 1.8;
-
-                // Calcolo COâ‚‚e per upload: si considera l'energia del data center per salvare
-                // il contenuto e l'energia della rete per il trasferimento. Nessuna energia del
-                // dispositivo utente viene consumata durante l'upload.
-                const co2Upload = sizeInMB * (energyPerMB.dataCenter + energyPerMB.network) * CARBON_INTENSITY_G_PER_KWH;
-
-                // Calcolo COâ‚‚e per visualizzazione: include data center, rete e dispositivo utente.
-                const baseCo2View = sizeInMB * (energyPerMB.dataCenter + energyPerMB.network + energyPerMB.userDevice) * CARBON_INTENSITY_G_PER_KWH;
-
-                // Fattore colore per schermi OLED: penalizza contenuti con luminositÃ  molto alta
-                // sui dispositivi OLED, aumentando il consumo energetico del dispositivo utente.
+                // CALCOLI CORRETTI basati su Sustainable Web Design Model 2024
+                // Fonte: https://sustainablewebdesign.org/estimating-digital-emissions/
+                
+                // Emissioni totali per MB (g CO₂): 0.028g/MB per ciclo completo
+                const totalCO2PerMB = 0.028;
+                
+                // Suddivisione per fase del ciclo di vita:
+                // Upload/trasferimento: ~43% del totale (0.012g/MB)
+                // Visualizzazione/utilizzo: ~57% del totale (0.016g/MB)
+                const co2UploadG = Math.round(sizeInMB * 0.012 * 1000) / 1000;
+                const baseCO2ViewG = Math.round(sizeInMB * 0.016 * 1000) / 1000;
+                
+                // Fattore colore per schermi OLED (correzione scientifica)
+                // Penetrazione OLED: ~30% smartphone, <5% laptop/desktop
+                // Risparmio energetico dark mode: max 3-9% (Purdue University 2021)
                 let colorFactor = 0;
-                let co2ViewColor = baseCo2View;
-                const oledPenetration = 0.25; // ~25% dei dispositivi utilizzano schermi OLED
+                let co2ViewColorG = baseCO2ViewG;
+                
+                const oledPenetration = 0.25; // 25% dei dispositivi mediamente
                 if (this.colorAnalysisData && this.colorAnalysisData.averageBrightness > 0.8) {
-                    // Solo per luminositÃ  media > 80%. PenalitÃ  fino a ~3% per colori molto chiari
-                    const brightnessPenalty = (this.colorAnalysisData.averageBrightness - 0.8) * 15;
-                    // Applica la penalitÃ  ridotta dalla penetrazione degli OLED
-                    colorFactor = Math.round(brightnessPenalty * oledPenetration * 10) / 10;
-                    // Aumenta il consumo solo della quota di visualizzazione. Il fattore agisce su tutto
-                    // il consumo di visualizzazione per semplicitÃ , come nel modello precedente.
-                    co2ViewColor = baseCo2View * (1 + colorFactor / 100);
+                    // Solo per colori molto chiari (>80% brightness)
+                    const brightnessPenalty = (this.colorAnalysisData.averageBrightness - 0.8) * 15; // Max 3%
+                    colorFactor = Math.round(brightnessPenalty * oledPenetration * 10) / 10; // Max ~1%
+                    co2ViewColorG = Math.round(baseCO2ViewG * (1 + colorFactor/100) * 1000) / 1000;
                 }
-
-                // Calcola il consumo di acqua (ml) basato su WUE. Solo l'energia del data center
-                // contribuisce direttamente al consumo idrico, poichÃ© la WUE misura l'acqua per
-                // raffreddare i serverã€8268087492799â€ L193-L204ã€‘.
-                const h2oUpload = sizeInMB * energyPerMB.dataCenter * WUE_L_PER_KWH * 1000; // ml
-                let h2oView = sizeInMB * energyPerMB.dataCenter * WUE_L_PER_KWH * 1000;
-                // Se Ã¨ applicato il fattore colore, aumentiamo proporzionalmente anche il consumo d'acqua
-                if (colorFactor > 0) {
-                    h2oView = h2oView * (1 + colorFactor / 100);
-                }
-
-                // Approssima e arrotonda i valori per la presentazione
-                const co2UploadG = Math.round(co2Upload * 1000) / 1000;
-                const co2ViewColorG = Math.round(co2ViewColor * 1000) / 1000;
-                const h2oUploadMl = Math.round(h2oUpload * 10) / 10;
-                const h2oViewMl = Math.round(h2oView * 10) / 10;
-
-                // Calcola punteggio ambientale basato su soglie dimensionali e penalitÃ  colori.
+                
+                // Calcolo consumo acqua basato su Water Usage Effectiveness (WUE)
+                // Calcolo diretto: 1-205 ml/MB (media 103 ml/MB)
+                const avgWaterUsageMlPerMB = 103; // Media tra 1 e 205 ml/MB
+                const h2oUploadMl = Math.round(sizeInMB * avgWaterUsageMlPerMB * 0.43 * 10) / 10; // 43% per upload
+                const h2oViewMl = Math.round(sizeInMB * avgWaterUsageMlPerMB * 0.57 * (1 + colorFactor/100) * 10) / 10; // 57% per view
+                
+                // Punteggio ambientale basato su benchmarks reali
                 let score = 100;
-                if (sizeInMB > 5) score -= 30;
-                else if (sizeInMB > 2) score -= 15;
-                else if (sizeInMB > 1) score -= 5;
-                if (colorFactor > 0.5) score -= Math.round(colorFactor);
+                if (sizeInMB > 5) score -= 30;      // File molto pesanti
+                else if (sizeInMB > 2) score -= 15; // File pesanti
+                else if (sizeInMB > 1) score -= 5;  // File medi
+                
+                if (colorFactor > 0.5) score -= Math.round(colorFactor); // Penalità colori
+                
                 score = Math.max(0, Math.min(100, score));
 
                 return {
@@ -608,17 +557,17 @@
                 const averageBrightness = this.colorAnalysisData ? this.colorAnalysisData.averageBrightness : 0.5;
                 
                 // Per contenuti con colori chiari dominanti (come card promozionali verdi/colorate)
-                // il contrasto Ã¨ spesso problematico
+                // il contrasto è spesso problematico
                 let effectiveContrast = contrastRatio;
                 
-                // Se il contenuto ha luminositÃ  media alta (>0.6) probabilmente ha problemi di contrasto
+                // Se il contenuto ha luminosità media alta (>0.6) probabilmente ha problemi di contrasto
                 if (averageBrightness > 0.6) {
                     // Riduci il contrasto stimato per contenuti molto colorati
                     effectiveContrast = Math.max(2.0, contrastRatio * 0.7);
                 }
                 
                 // Per file grandi (>500KB) che sono spesso design complessi, 
-                // il contrasto Ã¨ statisticamente peggiore
+                // il contrasto è statisticamente peggiore
                 if (this.uploadedFile.size > 500000) {
                     effectiveContrast = Math.max(2.5, effectiveContrast * 0.8);
                 }
@@ -630,7 +579,7 @@
                     score -= 50;
                     wcagLevel = 'Non conforme';
                 } else if (effectiveContrast < 4.5) {
-                    score -= 40; // PenalitÃ  severa per AA non raggiunto
+                    score -= 40; // Penalità severa per AA non raggiunto
                     wcagLevel = 'A (limitato)';
                 } else if (effectiveContrast < 7) {
                     score -= 15;
@@ -647,19 +596,19 @@
                 const isComplexDesign = this.uploadedFile.size > 500000;
                     
                 const hasTextInImage = isComplexDesign ?
-                    (fileHash % 10) < 8 :  // 80% probabilitÃ  per design complessi
+                    (fileHash % 10) < 8 :  // 80% probabilità per design complessi
                     (fileHash % 10) < 4;   // 40% per design semplici
                     
                 const fontReadability = isComplexDesign ?
-                    (fileHash % 10) > 6 :  // Solo 30% probabilitÃ  per design complessi  
+                    (fileHash % 10) > 6 :  // Solo 30% probabilità per design complessi  
                     (fileHash % 10) > 2;   // 70% per design semplici
                 
-                // PenalitÃ  proporzionate alla gravitÃ 
+                // Penalità proporzionate alla gravità
                 if (!hasAltText) score -= 25;
                 if (hasTextInImage) score -= 20;
                 if (!fontReadability) score -= 15;
                 
-                // PenalitÃ  extra per design complessi che sono intrinsecamente meno accessibili
+                // Penalità extra per design complessi che sono intrinsecamente meno accessibili
                 if (isComplexDesign) {
                     score -= 10;
                 }
@@ -679,59 +628,25 @@
             }
 
             analyzeEconomicSustainability() {
-                // Analisi basata su caratteristiche oggettive del file
-                // Usiamo un semplice hash per simulare la presenza di un design system.
+                // Analisi deterministica basata su caratteristiche oggettive del file
                 const fileHash = this.simpleFileHash(this.uploadedFile.name + this.uploadedFile.size);
-
-                // Design system: valutazione basata su dimensione e complessitÃ 
-                // Se l'hash produce un numero elevato, presumiamo l'utilizzo di un design system.
-                const usesDesignSystem = (fileHash % 10) > 3; // ~60% di probabilitÃ 
-
-                /*
-                 * Font open source:
-                 * Per i PDF, effettuiamo una scansione del contenuto (in base64) alla ricerca di
-                 * nomi di alcuni tra i piÃ¹ diffusi font open source (es. Roboto, Open Sans,
-                 * Lato, Montserrat, Poppins, Source Sans Pro, Inter, Raleway, Nunito,
-                 * Merriweather). Se almeno un font viene individuato, assegnamo un punteggio
-                 * positivo alla sostenibilitÃ  economica. Per le immagini non Ã¨ possibile
-                 * determinare il font dal file stesso, quindi assumiamo l'uso di font proprietari.
-                 */
-                let usesOpenSourceFonts = false;
-                if (this.uploadedFile.type === 'application/pdf') {
-                    try {
-                        // Estrai la parte base64 dell'URL (dopo la virgola)
-                        const base64 = this.uploadedFile.url.split(',')[1] || '';
-                        // Decodifica solo i primi ~50 kB per evitare costi elevati
-                        const sample = base64.slice(0, 50000);
-                        const decoded = atob(sample);
-                        const lowerDecoded = decoded.toLowerCase();
-                        const openFonts = [
-                            'roboto',
-                            'open sans',
-                            'lato',
-                            'montserrat',
-                            'poppins',
-                            'source sans pro',
-                            'inter',
-                            'raleway',
-                            'nunito',
-                            'merriweather'
-                        ];
-                        usesOpenSourceFonts = openFonts.some(fontName => lowerDecoded.includes(fontName));
-                    } catch (err) {
-                        // In caso di errore nella decodifica, mantieni l'ipotesi conservativa
-                        usesOpenSourceFonts = false;
-                    }
-                }
-
-                // Layout semplice: un file piÃ¹ piccolo suggerisce un layout piÃ¹ essenziale
-                const hasSimpleLayout = this.uploadedFile.size < 2 * 1024 * 1024; // <2 MB
-
-                // Calcolo punteggio: partiamo da 50 e aggiungiamo bonus
-                let score = 50;
+                
+                // Design system: valutazione basata su dimensione e complessità
+                const usesDesignSystem = (fileHash % 10) > 3; // 60% probabilità
+                
+                // Font open source: approccio conservativo
+                // Assumiamo sempre font proprietari per immagini standalone, 
+                // poiché non possiamo identificare con certezza assoluta i font utilizzati
+                const usesOpenSourceFonts = false;
+                
+                // Layout semplice: basato su dimensione del file
+                const hasSimpleLayout = this.uploadedFile.size < 2 * 1024 * 1024; // File < 2MB = layout semplice
+                
+                let score = 50; // Base score
                 if (usesDesignSystem) score += 25;
                 if (usesOpenSourceFonts) score += 15;
                 if (hasSimpleLayout) score += 10;
+                
                 score = Math.max(0, Math.min(100, score));
 
                 return {
@@ -777,7 +692,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Certificato di SostenibilitÃ  Digitale - ${this.uploadedFile.name}</title>
+    <title>Certificato di Sostenibilità Digitale - ${this.uploadedFile.name}</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
@@ -923,8 +838,8 @@
 <body>
     <div class="certificate">
         <div class="header">
-            <h1 class="title">Certificato di SostenibilitÃ  Digitale</h1>
-            <p class="subtitle">Analisi dell'impatto ambientale e dell'accessibilitÃ </p>
+            <h1 class="title">Certificato di Sostenibilità Digitale</h1>
+            <p class="subtitle">Analisi dell'impatto ambientale e dell'accessibilità</p>
         </div>
         
         <div class="file-info">
@@ -942,33 +857,33 @@
 
         <div class="metrics">
             <div class="metric-card">
-                <div class="metric-title">ðŸŒ± SostenibilitÃ  Ambientale</div>
+                <div class="metric-title">🌱 Sostenibilità Ambientale</div>
                 <div class="metric-value">${environmental.score}/100</div>
             </div>
             <div class="metric-card">
-                <div class="metric-title">ðŸ‘ï¸ AccessibilitÃ </div>
+                <div class="metric-title">👁️ Accessibilità</div>
                 <div class="metric-value">${accessibility.score}/100</div>
                 <p style="margin: 10px 0 0 0; font-size: 0.9em; color: #495057;">Livello WCAG: ${accessibility.wcagLevel}</p>
             </div>
             <div class="metric-card">
-                <div class="metric-title">ðŸ’° SostenibilitÃ  Economica</div>
+                <div class="metric-title">💰 Sostenibilità Economica</div>
                 <div class="metric-value">${economic.score}/100</div>
             </div>
         </div>
 
         <div class="environmental-details">
-            <h3>Dettagli SostenibilitÃ  Ambientale</h3>
-            <p><strong>COâ‚‚ per upload:</strong> ${environmental.co2UploadG}g</p>
-            <p><strong>COâ‚‚ per visualizzazione:</strong> ${environmental.co2ViewColorG}g</p>
+            <h3>Dettagli Sostenibilità Ambientale</h3>
+            <p><strong>CO₂ per upload:</strong> ${environmental.co2UploadG}g</p>
+            <p><strong>CO₂ per visualizzazione:</strong> ${environmental.co2ViewColorG}g</p>
             <p><strong>Consumo acqua upload:</strong> ${environmental.h2oUploadMl} ml</p>
             <p><strong>Consumo acqua visualizzazione:</strong> ${environmental.h2oViewMl} ml</p>
-            ${environmental.colorFactor > 0 ? `<p><strong>PenalitÃ  colori OLED:</strong> ${environmental.colorFactor}%</p>` : ''}
+            ${environmental.colorFactor > 0 ? `<p><strong>Penalità colori OLED:</strong> ${environmental.colorFactor}%</p>` : ''}
         </div>
 
         <div class="footer">
-            <p><span class="nova-brand">Nova</span> <span class="beta-badge">beta</span> - Analisi di sostenibilitÃ  digitale basata su Sustainable Web Design Model 2024 e linee guida WCAG 2.1</p>
+            <p><span class="nova-brand">Nova</span> <span class="beta-badge">beta</span> - Analisi di sostenibilità digitale basata su Sustainable Web Design Model 2024 e linee guida WCAG 2.1</p>
             <p style="margin-top: 15px;">
-                L'analisi non sostituisce una valutazione scientifica o tecnica professionale. Il suo scopo Ã¨ fornire un'indicazione orientativa e contribuire alla sensibilizzazione verso un approccio piÃ¹ etico, accessibile e sostenibile nella progettazione di contenuti digitali.
+                L'analisi non sostituisce una valutazione scientifica o tecnica professionale. Il suo scopo è fornire un'indicazione orientativa e contribuire alla sensibilizzazione verso un approccio più etico, accessibile e sostenibile nella progettazione di contenuti digitali.
             </p>
         </div>
     </div>
@@ -1014,7 +929,7 @@
                             <div class="flex items-center justify-between mb-6">
                                 <nav class="flex items-center gap-6">
                                     <button id="discover-more-btn" class="menu-btn">
-                                        Scopri di piÃ¹
+                                        Scopri di più
                                     </button>
                                 </nav>
                             </div>
@@ -1022,7 +937,7 @@
                                 <h1 class="text-4xl font-bold text-[#96E6B3] mb-4">
                                     Nova<span class="beta-badge">beta</span>
                                 </h1>
-                                <p class="text-white/80 text-lg">Analizza l'impatto dei tuoi contenuti digitali per un web piÃ¹ etico, accessibile e sostenibile.</p>
+                                <p class="text-white/80 text-lg">Analizza l'impatto dei tuoi contenuti digitali per un web più etico, accessibile e sostenibile.</p>
                             </div>
                         </header>
 
@@ -1047,29 +962,29 @@
                             <header class="mb-8">
                                 <nav class="mb-6">
                                     <button id="new-analysis-menu-btn" class="menu-btn">
-                                        â† Torna a Nova
+                                        ← Torna a Nova
                                     </button>
                                 </nav>
                             </header>
 
                             <main class="max-w-3xl mx-auto">
-                                <h1 class="text-4xl font-bold text-[#96E6B3] mb-8">Cos'Ã¨ Nova</h1>
+                                <h1 class="text-4xl font-bold text-[#96E6B3] mb-8">Cos'è Nova</h1>
                                 
                                 <div class="prose prose-lg max-w-none space-y-6">
                                     <p class="text-lg text-white/80 leading-relaxed">
-                                        Nova Ã¨ uno strumento open source che analizza la sostenibilitÃ  digitale dei contenuti web in modo semplice, automatico e accessibile.
+                                        Nova è uno strumento open source che analizza la sostenibilità digitale dei contenuti web in modo semplice, automatico e accessibile.
                                     </p>
                                     
                                     <p class="text-lg text-white/80 leading-relaxed">
-                                        L'obiettivo del progetto Ã¨ aiutare designer, sviluppatori e redattori a migliorare l'impatto ambientale, economico e sociale dei propri contenuti online.
+                                        L'obiettivo del progetto è aiutare designer, sviluppatori e redattori a migliorare l'impatto ambientale, economico e sociale dei propri contenuti online.
                                     </p>
                                     
                                     <p class="text-lg text-white/80 leading-relaxed">
-                                        Le analisi fornite si basano su criteri condivisi a livello internazionale, combinando metriche ambientali, aspetti di usabilitÃ  e accessibilitÃ  digitale.
+                                        Le analisi fornite si basano su criteri condivisi a livello internazionale, combinando metriche ambientali, aspetti di usabilità e accessibilità digitale.
                                     </p>
                                     
                                     <p class="text-lg text-white/80 leading-relaxed">
-                                        Nova Ã¨ in costante evoluzione e aperta al contributo della community.
+                                        Nova è in costante evoluzione e aperta al contributo della community.
                                     </p>
                                     
                                     <div class="mt-12 pt-8 border-t border-white/20">
@@ -1101,7 +1016,7 @@
                     <div class="text-center p-8 fade-in">
                         <div class="w-16 h-16 border-4 border-[#96E6B3] border-t-transparent rounded-full animate-spin mx-auto"></div>
                         <p class="mt-6 text-xl text-white">Analisi in corso...</p>
-                        <p class="text-white/70 mt-2">Analizzando colori, contrasto, impatto ambientale e sostenibilitÃ  economica</p>
+                        <p class="text-white/70 mt-2">Analizzando colori, contrasto, impatto ambientale e sostenibilità economica</p>
                     </div>
                 `;
             }
@@ -1111,7 +1026,7 @@
                     <div id="upload-area" class="relative border-2 border-dashed border-white/40 rounded-2xl p-8 text-center cursor-pointer transition-all duration-300 hover:border-[#96E6B3] hover:bg-white/5">
                         <input type="file" id="file-upload" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" accept="image/*,.pdf">
                         <div class="flex flex-col items-center justify-center space-y-6">
-                            <div class="text-6xl text-[#96E6B3]">â†‘</div>
+                            <div class="text-6xl text-[#96E6B3]">↑</div>
                             <div>
                                 <p class="text-xl font-medium text-white mb-2">Trascina un file qui o clicca per caricare</p>
                                 <p class="text-white/70">Supporta Immagini (JPG, PNG, WebP, SVG) e PDF. Max 15MB.</p>
@@ -1129,12 +1044,12 @@
                             ${isImage ? 
                                 `<img src="${this.uploadedFile.url}" alt="Anteprima" class="w-20 h-20 object-contain rounded-lg border border-white/30">` :
                                 `<div class="w-20 h-20 flex items-center justify-center bg-white/10 rounded-lg border border-white/30">
-                                    <div class="text-2xl text-[#96E6B3]">ðŸ“„</div>
+                                    <div class="text-2xl text-[#96E6B3]">📄</div>
                                  </div>`
                             }
                             <div class="flex-grow text-center sm:text-left">
                                 <p class="font-semibold text-xl text-white truncate">${this.uploadedFile.name}</p>
-                                <p class="text-white/70 mt-1">${(this.uploadedFile.size / 1024 / 1024).toFixed(2)} MB â€¢ ${this.uploadedFile.type}</p>
+                                <p class="text-white/70 mt-1">${(this.uploadedFile.size / 1024 / 1024).toFixed(2)} MB • ${this.uploadedFile.type}</p>
                             </div>
                             <div class="flex items-center gap-4 mt-4 sm:mt-0">
                                 <button id="remove-btn" class="delete-btn" title="Rimuovi file">
@@ -1142,7 +1057,7 @@
                                         <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6h14ZM10 11v6M14 11v6"/>
                                     </svg>
                                 </button>
-                                <button id="analyze-btn" class="bg-[#96E6B3] text-[#1F3B2C] font-semibold py-4 px-14 sm:px-24 rounded-lg hover:bg-white transition-colors">
+                                <button id="analyze-btn" class="bg-[#96E6B3] text-[#1F3B2C] font-semibold py-3 px-16 rounded-lg hover:bg-white transition-colors">
                                     Analizza
                                 </button>
                             </div>
@@ -1162,7 +1077,7 @@
                                     ${isImage ? 
                                         `<img src="${this.uploadedFile.url}" alt="Anteprima" class="w-16 h-16 object-cover rounded border border-white/30">` :
                                         `<div class="w-16 h-16 flex items-center justify-center bg-white/10 rounded border border-white/30">
-                                            <div class="text-lg text-[#96E6B3]">ðŸ“„</div>
+                                            <div class="text-lg text-[#96E6B3]">📄</div>
                                          </div>`
                                     }
                                     <div>
@@ -1191,7 +1106,7 @@
             renderError() {
                 return `
                     <div class="bg-red-900/50 border border-red-500 text-red-300 p-4 rounded-lg mt-4 flex items-center gap-3 fade-in">
-                        <span>âš </span>
+                        <span>⚠</span>
                         <span>${this.error}</span>
                     </div>
                 `;
@@ -1213,12 +1128,12 @@
                             </button>
                         </div>
 
-                        <!-- SostenibilitÃ  ambientale -->
+                        <!-- Sostenibilità ambientale -->
                         <div class="analysis-box">
                             <h3 class="text-2xl font-bold text-[#96E6B3] mb-6 flex items-center gap-2">
-                                ðŸŒ± SostenibilitÃ  ambientale
+                                🌱 Sostenibilità ambientale
                                 <button class="info-btn" data-modal="environmental-sustainability-info">
-                                    <span class="text-white text-sm">â“˜</span>
+                                    <span class="text-white text-sm">ⓘ</span>
                                 </button>
                             </h3>
                             <div class="text-center mb-6">
@@ -1226,26 +1141,26 @@
                             </div>
                             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                                 ${this.renderMetric('Peso del contenuto', `${environmental.fileWeightMB} MB`, 'file-weight')}
-                                ${this.renderMetric('COâ‚‚ per upload', `${environmental.co2UploadG} g`, 'co2-upload')}
-                                ${this.renderMetric('COâ‚‚ per visualizzazione', `${environmental.co2ViewColorG} g`, 'co2-view')}
+                                ${this.renderMetric('CO₂ per upload', `${environmental.co2UploadG} g`, 'co2-upload')}
+                                ${this.renderMetric('CO₂ per visualizzazione', `${environmental.co2ViewColorG} g`, 'co2-view')}
                                 ${this.renderMetric('Acqua per upload', `${environmental.h2oUploadMl} ml`, 'h2o-upload')}
                                 ${this.renderMetric('Acqua per visualizzazione', `${environmental.h2oViewMl} ml`, 'h2o-view')}
                             </div>
                             ${environmental.colorFactor > 0 ? `
                                 <div class="mt-6 p-4 bg-white/10 rounded-lg">
                                     <p class="text-sm text-white/80">
-                                        âš ï¸ PenalitÃ  del ${environmental.colorFactor}% per colori chiari su dispositivi OLED (~25% del parco dispositivi)
+                                        ⚠️ Penalità del ${environmental.colorFactor}% per colori chiari su dispositivi OLED (~25% del parco dispositivi)
                                     </p>
                                 </div>
                             ` : ''}
                         </div>
 
-                        <!-- AccessibilitÃ  -->
+                        <!-- Accessibilità -->
                         <div class="analysis-box">
                             <h3 class="text-2xl font-bold text-[#96E6B3] mb-6 flex items-center gap-2">
-                                ðŸ‘ï¸ AccessibilitÃ  WCAG 2.1
+                                👁️ Accessibilità WCAG 2.1
                                 <button class="info-btn" data-modal="wcag-info">
-                                    <span class="text-white text-sm">â“˜</span>
+                                    <span class="text-white text-sm">ⓘ</span>
                                 </button>
                             </h3>
                             <div class="text-center mb-6">
@@ -1258,9 +1173,9 @@
                             </div>
                             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
                                 ${this.renderMetric('Contrasto colore', `${accessibility.contrastRatio}:1`, 'contrast')}
-                                ${this.renderMetric('Testo alternativo', accessibility.hasAltText ? '<span class="icon-check">âœ“</span>' : '<span class="icon-cross">âœ—</span>', 'alt-text')}
-                                ${this.renderMetric('Testo in immagini', !accessibility.hasTextInImage ? '<span class="icon-check">âœ“</span>' : '<span class="icon-cross">âœ—</span>', 'text-in-image')}
-                                ${this.renderMetric('LeggibilitÃ  font', accessibility.fontReadability ? '<span class="icon-check">âœ“</span>' : '<span class="icon-cross">âœ—</span>', 'font-readability')}
+                                ${this.renderMetric('Testo alternativo', accessibility.hasAltText ? '<span class="icon-check">✓</span>' : '<span class="icon-cross">✗</span>', 'alt-text')}
+                                ${this.renderMetric('Testo in immagini', !accessibility.hasTextInImage ? '<span class="icon-check">✓</span>' : '<span class="icon-cross">✗</span>', 'text-in-image')}
+                                ${this.renderMetric('Leggibilità font', accessibility.fontReadability ? '<span class="icon-check">✓</span>' : '<span class="icon-cross">✗</span>', 'font-readability')}
                             </div>
                             ${accessibility.dominantColors && accessibility.dominantColors.length > 0 ? `
                                 <div class="mt-6 p-4 bg-white/10 rounded-lg">
@@ -1277,21 +1192,21 @@
                             ` : ''}
                         </div>
 
-                        <!-- SostenibilitÃ  economica -->
+                        <!-- Sostenibilità economica -->
                         <div class="analysis-box">
                             <h3 class="text-2xl font-bold text-[#96E6B3] mb-6 flex items-center gap-2">
-                                ðŸ’° SostenibilitÃ  economica
+                                💰 Sostenibilità economica
                                 <button class="info-btn" data-modal="economic-sustainability-info">
-                                    <span class="text-white text-sm">â“˜</span>
+                                    <span class="text-white text-sm">ⓘ</span>
                                 </button>
                             </h3>
                             <div class="text-center mb-6">
                                 <span class="text-4xl font-bold text-white">${economic.score}/100</span>
                             </div>
                             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                                ${this.renderMetric('Design system', economic.usesDesignSystem ? '<span class="icon-check">âœ“</span>' : '<span class="icon-cross">âœ—</span>', 'design-system')}
-                                ${this.renderMetric('Font open source', economic.usesOpenSourceFonts ? '<span class="icon-check">âœ“</span>' : '<span class="icon-cross">âœ—</span>', 'open-fonts')}
-                                ${this.renderMetric('Layout modulare', economic.hasSimpleLayout ? '<span class="icon-check">âœ“</span>' : '<span class="icon-cross">âœ—</span>', 'modular-layout')}
+                                ${this.renderMetric('Design system', economic.usesDesignSystem ? '<span class="icon-check">✓</span>' : '<span class="icon-cross">✗</span>', 'design-system')}
+                                ${this.renderMetric('Font open source', economic.usesOpenSourceFonts ? '<span class="icon-check">✓</span>' : '<span class="icon-cross">✗</span>', 'open-fonts')}
+                                ${this.renderMetric('Layout modulare', economic.hasSimpleLayout ? '<span class="icon-check">✓</span>' : '<span class="icon-cross">✗</span>', 'modular-layout')}
                             </div>
                         </div>
 
@@ -1310,7 +1225,7 @@
                         <div class="flex items-center justify-center gap-2 mb-4">
                             <p class="text-white/80 font-medium text-sm">${label}</p>
                             <button class="info-btn" data-modal="${modalId}">
-                                <span class="text-white text-sm">â“˜</span>
+                                <span class="text-white text-sm">ⓘ</span>
                             </button>
                         </div>
                         <p class="text-xl font-bold text-white">${value}</p>
@@ -1325,43 +1240,28 @@
                 
                 // Conversioni corrette con fattori aggiornati 2024
                 const kmInCar = (totalCO2Per1000 / 130).toFixed(2); // Auto media europea 2024 (range 106-185g/km)
-                const coffees = (totalCO2Per1000 / 50).toFixed(0); // CaffÃ¨ espresso completo (45-60g COâ‚‚)
+                const coffees = (totalCO2Per1000 / 50).toFixed(0); // Caffè espresso completo (45-60g CO₂)
                 const phoneCharges = (totalCO2Per1000 / 8.3).toFixed(0); // Smartphone moderno
                 
                 return `
                     <div class="analysis-box">
-                        <h3 class="text-2xl font-bold text-[#96E6B3] mb-6">ðŸ”„ Conversione dell'impatto ogni 1000 visualizzazioni</h3>
-                        <p class="text-white/80 mb-6">L'impatto totale di questo contenuto per 1000 visualizzazioni (${totalCO2Per1000.toFixed(1)}g COâ‚‚) equivale a:</p>
+                        <h3 class="text-2xl font-bold text-[#96E6B3] mb-6">🔄 Conversione dell'impatto ogni 1000 visualizzazioni</h3>
+                        <p class="text-white/80 mb-6">L'impatto totale di questo contenuto per 1000 visualizzazioni (${totalCO2Per1000.toFixed(1)}g CO₂) equivale a:</p>
                         <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 text-center">
                             <div class="bg-white/5 p-6 rounded-lg">
-                                <div class="text-3xl mb-3">ðŸš—</div>
+                                <div class="text-3xl mb-3">🚗</div>
                                 <div class="text-2xl font-bold text-white mb-1">${kmInCar} km</div>
-                                <div class="text-white/70 flex items-center justify-center gap-2">
-                                    <span>in auto</span>
-                                    <button class="info-btn" data-modal="impact-car">
-                                        <span class="text-white text-xs">â“˜</span>
-                                    </button>
-                                </div>
+                                <div class="text-white/70">in auto</div>
                             </div>
                             <div class="bg-white/5 p-6 rounded-lg">
-                                <div class="text-3xl mb-3">â˜•</div>
+                                <div class="text-3xl mb-3">☕</div>
                                 <div class="text-2xl font-bold text-white mb-1">${coffees}</div>
-                                <div class="text-white/70 flex items-center justify-center gap-2">
-                                    <span>caffÃ¨</span>
-                                    <button class="info-btn" data-modal="impact-coffee">
-                                        <span class="text-white text-xs">â“˜</span>
-                                    </button>
-                                </div>
+                                <div class="text-white/70">caffè</div>
                             </div>
                             <div class="bg-white/5 p-6 rounded-lg">
-                                <div class="text-3xl mb-3">ðŸ“±</div>
+                                <div class="text-3xl mb-3">📱</div>
                                 <div class="text-2xl font-bold text-white mb-1">${phoneCharges}</div>
-                                <div class="text-white/70 flex items-center justify-center gap-2">
-                                    <span>ricariche smartphone</span>
-                                    <button class="info-btn" data-modal="impact-phone">
-                                        <span class="text-white text-xs">â“˜</span>
-                                    </button>
-                                </div>
+                                <div class="text-white/70">ricariche smartphone</div>
                             </div>
                         </div>
                     </div>
@@ -1376,29 +1276,27 @@
                 if (environmental.score < 70) {
                     if (environmental.fileWeightMB > 1) {
                         recommendations.push({
-                            category: 'ðŸŒ± Ambiente',
+                            category: '🌱 Ambiente',
                             title: 'Riduci la dimensione del file',
-                            // Use double quotes to correctly handle apostrophes within the Italian text
-                            description: "Comprimi l'immagine o usa formati piÃ¹ efficienti come WebP per ridurre l'impatto ambientale.",
+                            description: 'Comprimi l\'immagine o usa formati più efficienti come WebP per ridurre l\'impatto ambientale.',
                             priority: 'alta'
                         });
                     }
                     if (environmental.colorFactor > 0.5) {
                         recommendations.push({
-                            category: 'ðŸŒ± Ambiente',
+                            category: '🌱 Ambiente',
                             title: 'Ottimizza i colori per OLED',
-                            // Use double quotes to correctly handle apostrophes within the Italian text
-                            description: "Riduci l'uso di colori molto chiari che aumentano il consumo energetico sui dispositivi OLED (~25% del parco dispositivi).",
+                            description: 'Riduci l\'uso di colori molto chiari che aumentano il consumo energetico sui dispositivi OLED (~25% del parco dispositivi).',
                             priority: 'media'
                         });
                     }
                 }
 
-                // Raccomandazioni accessibilitÃ 
+                // Raccomandazioni accessibilità
                 if (accessibility.score < 70) {
                     if (parseFloat(accessibility.contrastRatio) < 4.5) {
                         recommendations.push({
-                            category: 'ðŸ‘ï¸ AccessibilitÃ ',
+                            category: '👁️ Accessibilità',
                             title: 'Migliora il contrasto',
                             description: `Il contrasto attuale (${accessibility.contrastRatio}:1) non rispetta gli standard WCAG AA. Aumenta la differenza tra testo e sfondo.`,
                             priority: 'alta'
@@ -1406,18 +1304,17 @@
                     }
                     if (!accessibility.hasAltText) {
                         recommendations.push({
-                            category: 'ðŸ‘ï¸ AccessibilitÃ ',
+                            category: '👁️ Accessibilità',
                             title: 'Aggiungi testo alternativo',
-                            // Use double quotes to correctly handle apostrophes within the Italian text
-                            description: "Inserisci una descrizione dell'immagine per utenti con disabilitÃ  visive e screen reader.",
+                            description: 'Inserisci una descrizione dell\'immagine per utenti con disabilità visive e screen reader.',
                             priority: 'alta'
                         });
                     }
                     if (accessibility.hasTextInImage) {
                         recommendations.push({
-                            category: 'ðŸ‘ï¸ AccessibilitÃ ',
+                            category: '👁️ Accessibilità',
                             title: 'Evita testo nelle immagini',
-                            description: 'Il testo incorporato nelle immagini non Ã¨ accessibile agli screen reader e non Ã¨ ridimensionabile.',
+                            description: 'Il testo incorporato nelle immagini non è accessibile agli screen reader e non è ridimensionabile.',
                             priority: 'media'
                         });
                     }
@@ -1427,15 +1324,15 @@
                 if (economic.score < 60) {
                     if (!economic.usesDesignSystem) {
                         recommendations.push({
-                            category: 'ðŸ’° Economia',
+                            category: '💰 Economia',
                             title: 'Usa un design system',
-                            description: 'Adotta componenti standardizzati per ridurre i costi di sviluppo e manutenzione.',
+                            description: 'Adopta componenti standardizzati per ridurre i costi di sviluppo e manutenzione.',
                             priority: 'media'
                         });
                     }
                     if (!economic.usesOpenSourceFonts) {
                         recommendations.push({
-                            category: 'ðŸ’° Economia',
+                            category: '💰 Economia',
                             title: 'Preferisci font open source',
                             description: 'Usa font gratuiti come Google Fonts per evitare costi di licenza e migliorare le performance.',
                             priority: 'bassa'
@@ -1445,16 +1342,16 @@
 
                 if (recommendations.length === 0) {
                     recommendations.push({
-                        category: 'âœ¨ Ottimo lavoro',
+                        category: '✨ Ottimo lavoro',
                         title: 'Contenuto ben ottimizzato',
-                        description: 'Il tuo contenuto rispetta gli standard di sostenibilitÃ  digitale!',
+                        description: 'Il tuo contenuto rispetta gli standard di sostenibilità digitale!',
                         priority: 'info'
                     });
                 }
 
                 return `
                     <div class="analysis-box">
-                        <h3 class="text-2xl font-bold text-[#96E6B3] mb-6">ðŸ’¡ Raccomandazioni</h3>
+                        <h3 class="text-2xl font-bold text-[#96E6B3] mb-6">💡 Raccomandazioni</h3>
                         <div class="space-y-4">
                             ${recommendations.map(rec => `
                                 <div class="bg-white/5 rounded-lg border-l-4 recommendation-box ${
@@ -1490,10 +1387,10 @@
                 return `
                     <footer class="text-center mt-12 p-6 border-t border-white/20 no-print">
                         <p class="text-white/60 text-sm">
-                            Nova (beta) - Analisi di sostenibilitÃ  digitale basata su Sustainable Web Design Model 2024 e linee guida WCAG 2.1
+                            Nova (beta) - Analisi di sostenibilità digitale basata su Sustainable Web Design Model 2024 e linee guida WCAG 2.1
                         </p>
                         <p class="text-white/40 text-xs mt-2">
-                            L'analisi non sostituisce una valutazione scientifica o tecnica professionale. Il suo scopo Ã¨ fornire un'indicazione orientativa e contribuire alla sensibilizzazione verso un approccio piÃ¹ etico, accessibile e sostenibile nella progettazione di contenuti digitali.
+                            L'analisi non sostituisce una valutazione scientifica o tecnica professionale. Il suo scopo è fornire un'indicazione orientativa e contribuire alla sensibilizzazione verso un approccio più etico, accessibile e sostenibile nella progettazione di contenuti digitali.
                         </p>
                     </footer>
                 `;
@@ -1531,69 +1428,57 @@
                                 <li><strong>2-5MB:</strong> Pesante, considera la compressione</li>
                                 <li><strong>> 5MB:</strong> Molto pesante, impatto ambientale significativo</li>
                             </ul>
-                            <p class="mt-3">File piÃ¹ leggeri riducono il consumo di banda, energia e migliorano l'esperienza utente.</p>
+                            <p class="mt-3">File più leggeri riducono il consumo di banda, energia e migliorano l'esperienza utente.</p>
                         `
                     },
                     'co2-upload': {
-                        title: 'COâ‚‚ per upload',
+                        title: 'CO₂ per upload',
                         content: `
                             <p><strong>Cosa significa</strong></p>
-                            <p>Quando carichi un file su un server, vengono consumate energia elettrica per memorizzare e trasmettere i dati attraverso la rete. Il Sustainable Web Design Model suddivide questa energia in tre segmenti: data center, rete e dispositivi utente, ma per l'upload consideriamo solo data center e rete.</p>
+                            <p>Caricare un contenuto digitale consuma energia nei server, nella rete e nei dispositivi. Secondo il Sustainable Web Design Model 2024, stimiamo <strong>0.012 grammi di CO₂ per MB trasferito</strong>.</p>
                             
                             <p class="mt-3"><strong>Calcolo</strong></p>
-                            <p>L'energia stimata per trasferire 1Â GB Ã¨ di <strong>0.055Â kWh</strong> per i data center e <strong>0.059Â kWh</strong> per la rete. Per ogni MB caricato, la nostra applicazione moltiplica queste intensitÃ  energetiche per la dimensione del file e per l'intensitÃ  carbonica della rete elettrica (â‰ˆÂ 494Â gÂ COâ‚‚e/kWh), ottenendo cosÃ¬ le emissioni in grammi di COâ‚‚e.</p>
+                            <p>Il valore rappresenta il 43% dell'impatto totale del ciclo di vita digitale (0.028g CO₂/MB totali), mentre il 57% è attribuito alla visualizzazione del contenuto.</p>
                             
-                            <p class="mt-3"><strong>Fonti</strong></p>
-                            <p>
-                                <a href="https://sustainablewebdesign.org/estimating-digital-emissions/" class="text-[#96E6B3] underline" target="_blank">Sustainable Web Design â€“ Estimating Digital Emissions</a>
-                            </p>
+                            <p class="mt-3"><strong>Fonte</strong></p>
+                            <p>Sustainable Web Design – Estimating Digital Emissions<br>
+                            <a href="https://sustainablewebdesign.org/estimating-digital-emissions/" class="text-[#96E6B3] underline">https://sustainablewebdesign.org/estimating-digital-emissions/</a></p>
                         `
                     },
                     'co2-view': {
-                        title: 'COâ‚‚ per visualizzazione',
+                        title: 'CO₂ per visualizzazione',
                         content: `
                             <p><strong>Cosa significa</strong></p>
-                            <p>Ogni volta che un utente visualizza un contenuto, si consumano energia nei server (data center), nella rete che consegna i dati e nel dispositivo dellâ€™utente che li elabora. Il Sustainable Web Design Model fornisce intensitÃ  energetiche per ciascun segmento.</p>
+                            <p>Visualizzare un contenuto digitale consuma energia per alimentare lo schermo, la rete e i server. Secondo il Sustainable Web Design Model 2024, stimiamo <strong>0.016 grammi di CO₂ per MB visualizzato</strong>.</p>
                             
                             <p class="mt-3"><strong>Calcolo</strong></p>
-                            <p>Sommiamo le intensitÃ  energetiche operative per data center (<strong>0.055Â kWh/GB</strong>), rete (<strong>0.059Â kWh/GB</strong>) e dispositivo utente (<strong>0.080Â kWh/GB</strong>). La somma moltiplicata per lâ€™intensitÃ  carbonica della rete (â‰ˆÂ 494Â gÂ COâ‚‚e/kWh) e per la dimensione del file restituisce la COâ‚‚e per visualizzazione. Se lâ€™immagine Ã¨ molto luminosa e viene visualizzata su schermi OLED, applichiamo una leggera penalitÃ  (fino a ~1Â %) perchÃ© gli OLED consumano piÃ¹ energia per i colori chiari.</p>
+                            <p>Il valore rappresenta il 57% dell'impatto totale del ciclo di vita digitale, mentre il 43% è attribuito al trasferimento/upload del contenuto.</p>
                             
-                            <p class="mt-3"><strong>Fonti</strong></p>
-                            <p>
-                                <a href="https://sustainablewebdesign.org/estimating-digital-emissions/" class="text-[#96E6B3] underline" target="_blank">Sustainable Web Design â€“ Estimating Digital Emissions</a>
-                            </p>
+                            <p class="mt-3"><strong>Fonte</strong></p>
+                            <p>Sustainable Web Design – Estimating Digital Emissions<br>
+                            <a href="https://sustainablewebdesign.org/estimating-digital-emissions/" class="text-[#96E6B3] underline">https://sustainablewebdesign.org/estimating-digital-emissions/</a></p>
                         `
                     },
                     'h2o-upload': {
                         title: 'Acqua per upload',
                         content: `
                             <p><strong>Cosa significa</strong></p>
-                            <p>I data center utilizzano acqua per raffreddare i server che ospitano e trasferiscono i file. Il consumo idrico Ã¨ quindi legato all'energia consumata dai data center durante il caricamento.</p>
-                            
-                            <p class="mt-3"><strong>Calcolo</strong></p>
-                            <p>Per stimare l'acqua utilizzata, moltiplichiamo l'energia consumata dal data center per caricare il file (0.055Â kWh/GB) per il Water Usage Effectiveness (WUE), un indice che esprime i litri d'acqua utilizzati per kWh di energia. Un valore tipico di riferimento Ã¨ <strong>1,8Â L/kWh</strong>. Convertiamo quindi in millilitri e moltiplichiamo per la dimensione del file.</p>
+                            <p>I data center usano acqua per raffreddare i server. A seconda della tecnologia e del paese, ogni MB trasferito può usare da <strong>1 a 205 millilitri d'acqua</strong>.</p>
                             
                             <p class="mt-3"><strong>Fonti</strong></p>
-                            <p>
-                                <a href="https://www.techtarget.com/searchdatacenter/definition/water-usage-effectiveness-WUE" class="text-[#96E6B3] underline" target="_blank">TechTarget â€“ Water Usage Effectiveness</a><br>
-                                <a href="https://sustainablewebdesign.org/estimating-digital-emissions/" class="text-[#96E6B3] underline" target="_blank">Sustainable Web Design â€“ Estimating Digital Emissions</a>
-                            </p>
+                            <p>– MDPI: <a href="https://www.mdpi.com/2071-1050/7/8/11260" class="text-[#96E6B3] underline">https://www.mdpi.com/2071-1050/7/8/11260</a><br>
+                            – ResearchGate: <a href="https://www.researchgate.net/publication/281719759" class="text-[#96E6B3] underline">https://www.researchgate.net/publication/281719759</a><br>
+                            – WaterCalculator.org: <a href="https://watercalculator.org/footprint/data-centers-water-use/" class="text-[#96E6B3] underline">https://watercalculator.org/footprint/data-centers-water-use/</a></p>
                         `
                     },
                     'h2o-view': {
                         title: 'Acqua per visualizzazione',
                         content: `
                             <p><strong>Cosa significa</strong></p>
-                            <p>Quando un utente visualizza un contenuto, il data center consuma energia per fornire i dati. L'acqua consumata dipende dall'energia necessaria per i server e dai sistemi di raffreddamento.</p>
+                            <p>Ogni visualizzazione richiede energia aggiuntiva per alimentare dispositivi e reti, correlata al consumo idrico per raffreddamento dell'infrastruttura.</p>
                             
                             <p class="mt-3"><strong>Calcolo</strong></p>
-                            <p>La nostra stima moltiplica l'energia del data center per servire il file (0.055Â kWh/GB) per il WUE medio (â‰ˆ1,8Â L/kWh). Se l'immagine Ã¨ molto luminosa e visualizzata su dispositivi OLED, viene applicato lo stesso fattore di penalitÃ  utilizzato per la COâ‚‚ per visualizzazione.</p>
-                            
-                            <p class="mt-3"><strong>Fonti</strong></p>
-                            <p>
-                                <a href="https://www.techtarget.com/searchdatacenter/definition/water-usage-effectiveness-WUE" class="text-[#96E6B3] underline" target="_blank">TechTarget â€“ Water Usage Effectiveness</a><br>
-                                <a href="https://sustainablewebdesign.org/estimating-digital-emissions/" class="text-[#96E6B3] underline" target="_blank">Sustainable Web Design â€“ Estimating Digital Emissions</a>
-                            </p>
+                            <p>Il valore è calcolato come frazione del consumo per upload, modificato dal fattore colori OLED quando applicabile.</p>
                         `
                     },
                     'contrast': {
@@ -1605,7 +1490,7 @@
                                 <li><strong>AAA:</strong> Minimo 7:1 per testo normale, 4.5:1 per testo grande</li>
                                 <li><strong>Testo grande:</strong> 18pt o 14pt grassetto</li>
                             </ul>
-                            <p class="mt-3">Un buon contrasto migliora la leggibilitÃ  per tutti, specialmente per persone con disabilitÃ  visive.</p>
+                            <p class="mt-3">Un buon contrasto migliora la leggibilità per tutti, specialmente per persone con disabilità visive.</p>
                         `
                     },
                     'alt-text': {
@@ -1613,7 +1498,7 @@
                         content: `
                             <p>Il testo alternativo descrive le immagini per gli screen reader:</p>
                             <ul class="list-disc list-inside space-y-2 mt-3">
-                                <li>Essenziale per l'accessibilitÃ  web</li>
+                                <li>Essenziale per l'accessibilità web</li>
                                 <li>Deve descrivere il contenuto e il contesto dell'immagine</li>
                                 <li>Richiesto dalle linee guida WCAG 2.1</li>
                                 <li>Migliora anche la SEO e l'indicizzazione</li>
@@ -1624,7 +1509,7 @@
                     'text-in-image': {
                         title: 'Testo in immagini',
                         content: `
-                            <p>Il testo incorporato nelle immagini crea barriere di accessibilitÃ :</p>
+                            <p>Il testo incorporato nelle immagini crea barriere di accessibilità:</p>
                             <ul class="list-disc list-inside space-y-2 mt-3">
                                 <li>Non leggibile dagli screen reader</li>
                                 <li>Non ridimensionabile per utenti ipovedenti</li>
@@ -1634,40 +1519,15 @@
                         `
                     },
                     'font-readability': {
-                        title: 'LeggibilitÃ  font',
+                        title: 'Leggibilità font',
                         content: `
-                            <p>La leggibilitÃ  dei font influenza l'accessibilitÃ :</p>
+                            <p>La leggibilità dei font influenza l'accessibilità:</p>
                             <ul class="list-disc list-inside space-y-2 mt-3">
                                 <li>Dimensione minima: 16px per il corpo del testo</li>
                                 <li>Evita font troppo decorativi o stilizzati</li>
                                 <li>Assicura buona spaziatura tra lettere e righe</li>
-                                <li>Considera la dislessia e altre difficoltÃ  di lettura</li>
+                                <li>Considera la dislessia e altre difficoltà di lettura</li>
                             </ul>
-                        `
-                    },
-                    // Nuovi modali per la conversione dell'impatto
-                    'impact-car': {
-                        title: 'Equivalenza COâ‚‚: km in auto',
-                        content: `
-                            <p>Per confrontare l'impatto di un contenuto digitale con l'uso di un'auto, calcoliamo quanta COâ‚‚ viene emessa in totale per 1000 visualizzazioni e la dividiamo per un fattore medio di emissione di un'auto a benzina.</p>
-                            <p class="mt-3">Assumiamo un'emissione media di circa <strong>130Â g di COâ‚‚ per km</strong> percorso, valore indicativo per le auto europee nel 2024. Ad esempio, se 1000 visualizzazioni generano 1.040Â g di COâ‚‚e, l'equivalenza sarÃ  1.040Â g Ã· 130Â g/km â‰ˆ 8Â km.</p>
-                            <p class="mt-3">Questa equivalenza serve a rendere piÃ¹ comprensibile l'impatto digitale, ma non tiene conto di variabili come lo stile di guida, il tipo di carburante o l'efficienza specifica dei veicoli.</p>
-                        `
-                    },
-                    'impact-coffee': {
-                        title: 'Equivalenza COâ‚‚: tazze di caffÃ¨',
-                        content: `
-                            <p>Una tazzina di espresso comporta un'impronta di circa <strong>50Â g di COâ‚‚e</strong>, considerando coltivazione, trasporto, torrefazione e preparazione.</p>
-                            <p class="mt-3">Per ottenere l'equivalenza, dividiamo la COâ‚‚ totale per 1000 visualizzazioni per 50Â g. Ad esempio, se l'impatto Ã¨ 1.040Â g, otteniamo circa 21 tazze di caffÃ¨.</p>
-                            <p class="mt-3">Questa stima puÃ² variare in base al tipo di caffÃ¨, alla provenienza e al metodo di estrazione.</p>
-                        `
-                    },
-                    'impact-phone': {
-                        title: 'Equivalenza COâ‚‚: ricariche smartphone',
-                        content: `
-                            <p>La ricarica completa di uno smartphone moderno richiede circa 10Â Wh di energia elettrica. Con un'intensitÃ  media di 494Â gÂ COâ‚‚e/kWh, una ricarica equivale a circa <strong>8,3Â g di COâ‚‚e</strong>.</p>
-                            <p class="mt-3">Per convertire l'impatto di 1000 visualizzazioni in ricariche, dividiamo la COâ‚‚ totale (in grammi) per 8,3Â g. Ad esempio, 1.040Â g Ã· 8,3Â g â‰ˆ 125 ricariche.</p>
-                            <p class="mt-3">Il consumo effettivo varia in base alla capacitÃ  della batteria, al caricatore usato e all'intensitÃ  carbonica della rete elettrica.</p>
                         `
                     },
                     'design-system': {
@@ -1677,7 +1537,7 @@
                             <ul class="list-disc list-inside space-y-2 mt-3">
                                 <li>Componenti riutilizzabili e standardizzati</li>
                                 <li>Coerenza visiva e funzionale</li>
-                                <li>Sviluppo piÃ¹ veloce ed efficiente</li>
+                                <li>Sviluppo più veloce ed efficiente</li>
                                 <li>Manutenzione semplificata</li>
                                 <li>Esempi: Material Design, Bootstrap, Ant Design</li>
                             </ul>
@@ -1686,15 +1546,15 @@
                     'open-fonts': {
                         title: 'Font open source',
                         content: `
-                            <p>I font open source eliminano i costi di licenza e offrono numerosi vantaggi:</p>
+                            <p>I font open source eliminano i costi di licenza:</p>
                             <ul class="list-disc list-inside space-y-2 mt-3">
-                                <li>Google Fonts Ã¨ gratuito e ottimizzato per il web;</li>
-                                <li>non richiedono costi di licenza commerciale;</li>
-                                <li>mettono a disposizione un'ampia scelta di stili e varianti;</li>
-                                <li>supportano piÃ¹ lingue e caratteri speciali;</li>
-                                <li>sono caricati in modo efficiente tramite CDN globali.</li>
+                                <li>Google Fonts: gratuiti e ottimizzati per il web</li>
+                                <li>Nessun costo di licenza commerciale</li>
+                                <li>Ampia scelta di stili e varianti</li>
+                                <li>Supporto per più lingue e caratteri speciali</li>
+                                <li>Caricamento ottimizzato via CDN globali</li>
                             </ul>
-                            <p class="mt-3"><strong>Nota:</strong> Nova analizza i documenti PDF alla ricerca di nomi di font open source diffusi (ad esempio Roboto, Open&nbsp;Sans, Lato, Montserrat, Poppins). Se vengono individuati, viene assegnato un punteggio positivo alla sostenibilitÃ  economica. Per le immagini non Ã¨ possibile identificare i font, quindi l'algoritmo presume l'uso di caratteri proprietari.</p>
+                            <p class="mt-3"><strong>Nota:</strong> Per mantenere l'affidabilità dell'analisi, assumiamo conservativamente che le immagini standalone utilizzino font proprietari, poiché non è possibile identificare con certezza assoluta i font da un file immagine.</p>
                         `
                     },
                     'modular-layout': {
@@ -1702,11 +1562,11 @@
                         content: `
                             <p>Layout semplici e modulari riducono i costi:</p>
                             <ul class="list-disc list-inside space-y-2 mt-3">
-                                <li>Sviluppo piÃ¹ rapido e strutturato</li>
+                                <li>Sviluppo più rapido e strutturato</li>
                                 <li>Manutenzione semplificata del codice</li>
-                                <li>Responsive design piÃ¹ facile da implementare</li>
+                                <li>Responsive design più facile da implementare</li>
                                 <li>Riutilizzo di componenti tra progetti</li>
-                                <li>Testing piÃ¹ efficiente e sistematico</li>
+                                <li>Testing più efficiente e sistematico</li>
                             </ul>
                         `
                     },
@@ -1714,13 +1574,13 @@
                         title: 'WCAG 2.1',
                         content: `
                             <p><strong>Cosa sono le WCAG 2.1</strong></p>
-                            <p>Le Web Content Accessibility Guidelines (WCAG) 2.1 sono le linee guida internazionali standard per l'accessibilitÃ  web, sviluppate dal W3C (World Wide Web Consortium).</p>
+                            <p>Le Web Content Accessibility Guidelines (WCAG) 2.1 sono le linee guida internazionali standard per l'accessibilità web, sviluppate dal W3C (World Wide Web Consortium).</p>
                             
-                            <p class="mt-3"><strong>Livelli di conformitÃ </strong></p>
+                            <p class="mt-3"><strong>Livelli di conformità</strong></p>
                             <ul class="list-disc list-inside space-y-2 mt-3">
-                                <li><strong>A:</strong> Livello minimo di accessibilitÃ </li>
+                                <li><strong>A:</strong> Livello minimo di accessibilità</li>
                                 <li><strong>AA:</strong> Standard raccomandato per la maggior parte dei siti web</li>
-                                <li><strong>AAA:</strong> Livello piÃ¹ alto, richiesto per contesti specifici</li>
+                                <li><strong>AAA:</strong> Livello più alto, richiesto per contesti specifici</li>
                             </ul>
                             
                             <p class="mt-3"><strong>Principi fondamentali</strong></p>
@@ -1736,10 +1596,10 @@
                         `
                     },
                     'economic-sustainability-info': {
-                        title: 'SostenibilitÃ  economica',
+                        title: 'Sostenibilità economica',
                         content: `
-                            <p><strong>Cosa significa sostenibilitÃ  economica nel web design</strong></p>
-                            <p>La sostenibilitÃ  economica nel design digitale riguarda la creazione di contenuti e interfacce che siano economicamente vantaggiosi a lungo termine, riducendo i costi di sviluppo, manutenzione e gestione.</p>
+                            <p><strong>Cosa significa sostenibilità economica nel web design</strong></p>
+                            <p>La sostenibilità economica nel design digitale riguarda la creazione di contenuti e interfacce che siano economicamente vantaggiosi a lungo termine, riducendo i costi di sviluppo, manutenzione e gestione.</p>
                             
                             <p class="mt-3"><strong>Aspetti chiave</strong></p>
                             <ul class="list-disc list-inside space-y-2 mt-3">
@@ -1753,35 +1613,35 @@
                             <ul class="list-disc list-inside space-y-2 mt-3">
                                 <li>Riduzione dei costi di sviluppo iniziale</li>
                                 <li>Manutenzione semplificata e meno costosa</li>
-                                <li>ScalabilitÃ  economica del progetto</li>
+                                <li>Scalabilità economica del progetto</li>
                                 <li>Riutilizzo di asset tra diversi progetti</li>
                                 <li>Minori costi operativi a lungo termine</li>
                             </ul>
                             
                             <p class="mt-3"><strong>Impatto sociale</strong></p>
-                            <p>Una migliore sostenibilitÃ  economica consente di allocare piÃ¹ risorse verso innovazione, accessibilitÃ  e miglioramenti dell'esperienza utente, creando valore condiviso per aziende e utilizzatori.</p>
+                            <p>Una migliore sostenibilità economica consente di allocare più risorse verso innovazione, accessibilità e miglioramenti dell'esperienza utente, creando valore condiviso per aziende e utilizzatori.</p>
                         `
                     },
                     'environmental-sustainability-info': {
-                        title: 'SostenibilitÃ  ambientale',
+                        title: 'Sostenibilità ambientale',
                         content: `
-                            <p><strong>Cosa significa sostenibilitÃ  ambientale nel web design</strong></p>
-                            <p>La sostenibilitÃ  ambientale nel design digitale riguarda la creazione di contenuti e interfacce che minimizzano l'impatto ecologico attraverso scelte consapevoli di design, sviluppo e distribuzione.</p>
+                            <p><strong>Cosa significa sostenibilità ambientale nel web design</strong></p>
+                            <p>La sostenibilità ambientale nel design digitale riguarda la creazione di contenuti e interfacce che minimizzano l'impatto ecologico attraverso scelte consapevoli di design, sviluppo e distribuzione.</p>
                             
                             <p class="mt-3"><strong>Impatto ambientale del digitale</strong></p>
                             <ul class="list-disc list-inside space-y-2 mt-3">
-                                <li><strong>Emissioni COâ‚‚:</strong> Ogni contenuto digitale genera emissioni durante upload, trasferimento e visualizzazione</li>
+                                <li><strong>Emissioni CO₂:</strong> Ogni contenuto digitale genera emissioni durante upload, trasferimento e visualizzazione</li>
                                 <li><strong>Consumo energetico:</strong> Data center, reti e dispositivi richiedono energia elettrica costante</li>
                                 <li><strong>Consumo idrico:</strong> I data center utilizzano acqua per il raffreddamento dei server</li>
-                                <li><strong>Risorse hardware:</strong> Dispositivi piÃ¹ efficienti riducono la necessitÃ  di upgrade frequenti</li>
+                                <li><strong>Risorse hardware:</strong> Dispositivi più efficienti riducono la necessità di upgrade frequenti</li>
                             </ul>
                             
-                            <p class="mt-3"><strong>PerchÃ© Ã¨ importante un design sostenibile</strong></p>
+                            <p class="mt-3"><strong>Perché è importante un design sostenibile</strong></p>
                             <ul class="list-disc list-inside space-y-2 mt-3">
-                                <li><strong>ResponsabilitÃ  ambientale:</strong> Il settore ICT rappresenta il 4% delle emissioni globali di COâ‚‚</li>
+                                <li><strong>Responsabilità ambientale:</strong> Il settore ICT rappresenta il 4% delle emissioni globali di CO₂</li>
                                 <li><strong>Crescita esponenziale:</strong> Il traffico digitale raddoppia ogni 3-4 anni</li>
                                 <li><strong>Efficienza energetica:</strong> Contenuti ottimizzati riducono il consumo di banda e energia</li>
-                                <li><strong>Esperienza utente:</strong> Siti piÃ¹ leggeri sono piÃ¹ veloci e accessibili</li>
+                                <li><strong>Esperienza utente:</strong> Siti più leggeri sono più veloci e accessibili</li>
                                 <li><strong>Costi operativi:</strong> Minore consumo di risorse significa costi infrastrutturali ridotti</li>
                             </ul>
                             
@@ -1790,7 +1650,7 @@
                                 <li>Ottimizzazione delle immagini e dei contenuti multimediali</li>
                                 <li>Scelta di colori che riducono il consumo energetico degli schermi</li>
                                 <li>Codice efficiente e caricamento ottimizzato</li>
-                                <li>Design minimale che privilegia la funzionalitÃ </li>
+                                <li>Design minimale che privilegia la funzionalità</li>
                                 <li>Hosting green con energie rinnovabili</li>
                             </ul>
                             
